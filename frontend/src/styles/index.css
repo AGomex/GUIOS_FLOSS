@@ -366,3 +366,18 @@ tbody tr:hover { background: #f8fafc; }
   .topbar h1 { font-size: 18px; }
   .content { padding: 14px 12px 28px; }
 }
+
+/* ---------------------------------------------------------------------------
+   Catálogo y formularios conectados (Fase 1)
+   --------------------------------------------------------------------------- */
+.tree-meta { color: var(--muted); font-size: 10px; }
+.tree-metrics { color: var(--muted); font-size: 10px; text-align: right; }
+.inline-fields--settings { grid-template-columns: repeat(4, minmax(120px, 1fr)) auto; align-items: end; }
+.form-message { border-radius: 8px; padding: 9px 12px; font-size: 10px; margin-top: 12px; }
+.form-message--ok { background: #e7f6ef; color: #227d55; }
+.form-message--error { background: #fcecec; color: #b3261e; }
+.annotation { color: var(--muted); font-size: 10px; margin: 10px 0 0; }
+
+@media (max-width: 1024px) {
+  .inline-fields, .inline-fields--settings { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+}

@@ -11,7 +11,7 @@ Documentación interactiva: `/api/docs/` · Esquema OpenAPI: `/api/schema/`
 | Fechas | ISO 8601 con zona horaria |
 | Idioma | Código y nombres de campo en inglés; mensajes en español |
 | Identificadores | Enteros autoincrementales |
-| Paginación | `PageNumberPagination`, 25 por página |
+| Paginación | `PageNumberPagination`, 100 por página |
 | Filtros | `django-filter`, `search` y `ordering` |
 | Validación | En serializers (RNF-06), nunca solo en el cliente |
 | Autenticación | Ninguna en el alcance inicial |
@@ -120,9 +120,7 @@ Restricción de unicidad: `(name, version, provider)`.
 | `GET/PATCH/DELETE` | `/catalog/factors/{id}` | Detalle |
 | `GET/POST` | `/catalog/subfactors` | Subfactores; filtro `factor` |
 | `GET/PATCH/DELETE` | `/catalog/subfactors/{id}` | Detalle |
-| `GET/POST` | `/catalog/scales` | Escalas |
-| `GET/POST` | `/catalog/profiles` | Perfiles de importancia |
-| `POST` | `/catalog/profiles/{id}/activate` | Marca el perfil como predeterminado |
+| `GET/PATCH` | `/catalog/settings` | Configuración única (escala, umbral, relevancia) |
 
 Factor:
 
@@ -144,25 +142,14 @@ Factor:
 }
 ```
 
-Perfil:
+Configuración:
 
 ```json
 {
-  "id": 1,
-  "name": "GUIOS (tesis)",
-  "version": "1.0",
-  "scale": 1,
-  "is_matrix": [[1, 1, 2, 2], [1, 2, 2, 3], [2, 2, 3, 3], [2, 3, 3, 4]],
-  "ir_matrix": [[1, 1, 2, 2], [1, 2, 2, 3], [2, 2, 3, 3], [2, 3, 3, 4]],
+  "scale_min": 1,
+  "scale_max": 4,
   "foda_threshold": "3.00",
-  "weighting_mode": "ir",
-  "recommendation_rules": {
-    "C": "IR >= 3 en Debilidad o Amenaza",
-    "B": "IR = 2 en Debilidad o Amenaza",
-    "A": "sin Debilidad ni Amenaza relevante"
-  },
-  "is_default": true,
-  "is_active": true
+  "relevance_min": 2
 }
 ```
 
@@ -194,8 +181,7 @@ Content-Type: application/json
   "software": 3,
   "evaluator": "Carlos Mendoza",
   "organization": "Dirección Financiera",
-  "need": "Gestión contable e inventario",
-  "profile": 1
+  "need": "Gestión contable e inventario"
 }
 ```
 
@@ -209,8 +195,6 @@ Content-Type: application/json
   "organization": "Dirección Financiera",
   "need": "Gestión contable e inventario",
   "status": "borrador",
-  "profile": 1,
-  "profile_version": "1.0",
   "created_at": "2026-09-28T10:15:00-05:00"
 }
 ```
@@ -305,15 +289,14 @@ Content-Type: application/json
 }
 ```
 
-Si las evaluaciones usan perfiles distintos, la respuesta incluye
-`"normalized": true` y `"warnings": ["Las escalas se normalizaron a porcentaje."]`.
+Las evaluaciones comparadas deben usar la misma configuración; si no, se
+normalizan a porcentaje para la tabla comparativa.
 
-### 2.6 Dashboard y reportes
+### 2.6 Dashboard
 
 | Método | Ruta | Descripción |
 |---|---|---|
 | `GET` | `/dashboard/summary` | Totales, estados, recomendaciones y promedios |
-| `GET` | `/reports/{evaluation_id}?format=pdf\|xlsx` | Reporte descargable |
 
 ```json
 {

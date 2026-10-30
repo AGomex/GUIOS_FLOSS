@@ -1,0 +1,660 @@
+{
+  "dimensions": [
+    {
+      "code": "technological",
+      "name": "Tecnológica",
+      "description": "",
+      "order": 1
+    },
+    {
+      "code": "organizational",
+      "name": "Organizacional",
+      "description": "",
+      "order": 2
+    },
+    {
+      "code": "economic",
+      "name": "Económica",
+      "description": "",
+      "order": 3
+    }
+  ],
+  "factors": [
+    {
+      "dimension": "technological",
+      "code": "compatibility",
+      "name": "Compatibilidad",
+      "description": "",
+      "scope": "externo",
+      "ns": 8,
+      "tc": 33,
+      "ie": 3,
+      "il": 3,
+      "is_value": 3,
+      "order": 1,
+      "subfactors": [
+        {
+          "code": "compatibility-01",
+          "text": "Una empresa proporciona una infraestructura de nube lista para usar para este software",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "compatibility-02",
+          "text": "Los programas informáticos pueden exportar formatos propietarios",
+          "citations": 0,
+          "order": 2
+        },
+        {
+          "code": "compatibility-03",
+          "text": "El software interactúa y se integra con el software propietario existente",
+          "citations": 0,
+          "order": 3
+        },
+        {
+          "code": "compatibility-04",
+          "text": "El software está certificado para operar en su nicho de mercado",
+          "citations": 0,
+          "order": 4
+        },
+        {
+          "code": "compatibility-05",
+          "text": "El software es compatible con los casos de uso y las funcionalidades más comunes",
+          "citations": 0,
+          "order": 5
+        },
+        {
+          "code": "compatibility-06",
+          "text": "El software es compatible con múltiples componentes de hardware",
+          "citations": 0,
+          "order": 6
+        },
+        {
+          "code": "compatibility-07",
+          "text": "El software utiliza formatos estándar",
+          "citations": 0,
+          "order": 7
+        },
+        {
+          "code": "compatibility-08",
+          "text": "El software es compatible con varios sistemas operativos diferentes (el software es multiplataforma)",
+          "citations": 0,
+          "order": 8
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "reliability",
+      "name": "Fiabilidad",
+      "description": "",
+      "scope": "externo",
+      "ns": 5,
+      "tc": 19,
+      "ie": 3,
+      "il": 3,
+      "is_value": 3,
+      "order": 2,
+      "subfactors": [
+        {
+          "code": "reliability-01",
+          "text": "El software es fiable y estable",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "reliability-02",
+          "text": "El software tiene un buen historial en cuanto a errores de seguridad (el software es seguro)",
+          "citations": 0,
+          "order": 2
+        },
+        {
+          "code": "reliability-03",
+          "text": "El software es más flexible que la solución propietaria",
+          "citations": 0,
+          "order": 3
+        },
+        {
+          "code": "reliability-04",
+          "text": "El software es más confiable que la solución propietaria",
+          "citations": 0,
+          "order": 4
+        },
+        {
+          "code": "reliability-05",
+          "text": "El programa proporciona una amplia variedad de funciones de control de acceso",
+          "citations": 0,
+          "order": 5
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "maintainability",
+      "name": "Mantenibilidad",
+      "description": "",
+      "scope": "externo",
+      "ns": 1,
+      "tc": 4,
+      "ie": 3,
+      "il": 3,
+      "is_value": 3,
+      "order": 3,
+      "subfactors": [
+        {
+          "code": "maintainability-01",
+          "text": "El software es mantenido activamente por los desarrolladores",
+          "citations": 0,
+          "order": 1
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "customization",
+      "name": "Personalización",
+      "description": "",
+      "scope": "externo",
+      "ns": 6,
+      "tc": 30,
+      "ie": 3,
+      "il": 4,
+      "is_value": 3,
+      "order": 4,
+      "subfactors": [
+        {
+          "code": "customization-01",
+          "text": "El acceso al código fuente es un incentivo para la organización",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "customization-02",
+          "text": "El software se puede ampliar fácilmente para satisfacer las necesidades de la organización modificando el código fuente",
+          "citations": 0,
+          "order": 2
+        },
+        {
+          "code": "customization-03",
+          "text": "Las innovaciones se introducen en el software a un ritmo rápido",
+          "citations": 0,
+          "order": 3
+        },
+        {
+          "code": "customization-04",
+          "text": "El software es fácil de personalizar sin necesidad de modificar el códigofuente",
+          "citations": 0,
+          "order": 4
+        },
+        {
+          "code": "customization-05",
+          "text": "El software soporta nuevas funciones a través de módulos (el software es modular)",
+          "citations": 0,
+          "order": 5
+        },
+        {
+          "code": "customization-06",
+          "text": "Hay un repositorio público de extensiones para este software",
+          "citations": 0,
+          "order": 6
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "testability",
+      "name": "Prueba",
+      "description": "",
+      "scope": "externo",
+      "ns": 1,
+      "tc": 4,
+      "ie": 3,
+      "il": 3,
+      "is_value": 3,
+      "order": 5,
+      "subfactors": [
+        {
+          "code": "testability-01",
+          "text": "El software es fácil de desplegar y de probar",
+          "citations": 0,
+          "order": 1
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "documentation",
+      "name": "Documentación",
+      "description": "",
+      "scope": "externo",
+      "ns": 11,
+      "tc": 20,
+      "ie": 3,
+      "il": 1,
+      "is_value": 2,
+      "order": 6,
+      "subfactors": [
+        {
+          "code": "documentation-01",
+          "text": "El software está bien documentado",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "documentation-02",
+          "text": "La documentación de desarrollo cubre todas las características",
+          "citations": 0,
+          "order": 2
+        },
+        {
+          "code": "documentation-03",
+          "text": "La documentación está disponible en múltiples formatos",
+          "citations": 0,
+          "order": 3
+        },
+        {
+          "code": "documentation-04",
+          "text": "La documentación es fácil de entender",
+          "citations": 0,
+          "order": 4
+        },
+        {
+          "code": "documentation-05",
+          "text": "La documentación está actualizada",
+          "citations": 0,
+          "order": 5
+        },
+        {
+          "code": "documentation-06",
+          "text": "La documentación está escrita por escritores especializados (no desarrolladores)",
+          "citations": 0,
+          "order": 6
+        },
+        {
+          "code": "documentation-07",
+          "text": "La documentación del software es de alta calidad",
+          "citations": 0,
+          "order": 7
+        },
+        {
+          "code": "documentation-08",
+          "text": "El software viene con documentación de desarrollo",
+          "citations": 0,
+          "order": 8
+        },
+        {
+          "code": "documentation-09",
+          "text": "El software viene con documentación de usuario",
+          "citations": 0,
+          "order": 9
+        },
+        {
+          "code": "documentation-10",
+          "text": "La documentación del usuario cubre todas las características",
+          "citations": 0,
+          "order": 10
+        },
+        {
+          "code": "documentation-11",
+          "text": "Los formatos de datos están bien documentados",
+          "citations": 0,
+          "order": 11
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "portability",
+      "name": "Portabilidad",
+      "description": "",
+      "scope": "externo",
+      "ns": 2,
+      "tc": 4,
+      "ie": 3,
+      "il": 2,
+      "is_value": 2,
+      "order": 7,
+      "subfactors": [
+        {
+          "code": "portability-01",
+          "text": "Una versión de aplicación móvil de este software está disponible",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "portability-02",
+          "text": "El software es una sistemas de administración de base de datos independiente",
+          "citations": 0,
+          "order": 2
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "reusability",
+      "name": "Reusabilidad",
+      "description": "",
+      "scope": "externo",
+      "ns": 2,
+      "tc": 5,
+      "ie": 3,
+      "il": 2,
+      "is_value": 2,
+      "order": 8,
+      "subfactors": [
+        {
+          "code": "reusability-01",
+          "text": "La licencia permite extensiones propietarias",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "reusability-02",
+          "text": "El software se ofrece como una biblioteca / marco de trabajo",
+          "citations": 0,
+          "order": 2
+        }
+      ]
+    },
+    {
+      "dimension": "technological",
+      "code": "usability",
+      "name": "Usabilidad",
+      "description": "",
+      "scope": "externo",
+      "ns": 4,
+      "tc": 14,
+      "ie": 3,
+      "il": 2,
+      "is_value": 2,
+      "order": 9,
+      "subfactors": [
+        {
+          "code": "usability-01",
+          "text": "El software proporciona una interfaz gráfica de usuario (GUI)",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "usability-02",
+          "text": "El software es más fácil de usar que la alternativa propietaria",
+          "citations": 0,
+          "order": 2
+        },
+        {
+          "code": "usability-03",
+          "text": "El software es fácil de aprender",
+          "citations": 0,
+          "order": 3
+        },
+        {
+          "code": "usability-04",
+          "text": "El usuario está descontento con el software propietario",
+          "citations": 0,
+          "order": 4
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "management_support",
+      "name": "Apoyo de la alta dirección",
+      "description": "",
+      "scope": "interno",
+      "ns": 1,
+      "tc": 5,
+      "ie": 3,
+      "il": 4,
+      "is_value": 3,
+      "order": 1,
+      "subfactors": [
+        {
+          "code": "management_support-01",
+          "text": "La alta dirección apoya la adopción exitosa de este software",
+          "citations": 0,
+          "order": 1
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "training",
+      "name": "Formación",
+      "description": "",
+      "scope": "interno",
+      "ns": 4,
+      "tc": 27,
+      "ie": 3,
+      "il": 4,
+      "is_value": 3,
+      "order": 2,
+      "subfactors": [
+        {
+          "code": "training-01",
+          "text": "La adopción de este software permite a los usuarios mejorar las habilidades técnicas de TI",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "training-02",
+          "text": "El personal de la organización puede aprender fácilmente por sí mismo a utilizar este software",
+          "citations": 0,
+          "order": 2
+        },
+        {
+          "code": "training-03",
+          "text": "El personal de la organización está capacitado para resolver problemas tecnológicos",
+          "citations": 0,
+          "order": 3
+        },
+        {
+          "code": "training-04",
+          "text": "Los planes de entrenamiento de este software están disponibles",
+          "citations": 0,
+          "order": 4
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "support",
+      "name": "Soporte",
+      "description": "",
+      "scope": "ambos",
+      "ns": 6,
+      "tc": 43,
+      "ie": 3,
+      "il": 4,
+      "is_value": 3,
+      "order": 3,
+      "subfactors": [
+        {
+          "code": "support-01",
+          "text": "El soporte de la comunidad para este software está disponible",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "support-02",
+          "text": "Soporte de expertos y consultores externos para consultas específicas está disponible",
+          "citations": 0,
+          "order": 2
+        },
+        {
+          "code": "support-03",
+          "text": "El soporte comercial de este software está disponible 24/7/365",
+          "citations": 0,
+          "order": 3
+        },
+        {
+          "code": "support-04",
+          "text": "Hay desarrolladores en su organización que saben cómo desarrollar este software",
+          "citations": 0,
+          "order": 4
+        },
+        {
+          "code": "support-05",
+          "text": "Soporte comercial para la personalización de software está disponible",
+          "citations": 0,
+          "order": 5
+        },
+        {
+          "code": "support-06",
+          "text": "Es fácil contratar personal informático en la comunidad que conozca este software",
+          "citations": 0,
+          "order": 6
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "change_attitude",
+      "name": "Actitud hacia el cambio",
+      "description": "",
+      "scope": "interno",
+      "ns": 2,
+      "tc": 3,
+      "ie": 3,
+      "il": 1,
+      "is_value": 2,
+      "order": 4,
+      "subfactors": [
+        {
+          "code": "change_attitude-01",
+          "text": "El personal de la organización muestra poca resistencia al cambio tecnológico",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "change_attitude-02",
+          "text": "El personal técnico encargado del despliegue y soporte en la organización respalda la adopción de este software",
+          "citations": 0,
+          "order": 2
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "vendor_lock_in",
+      "name": "Bloqueo de proveedores",
+      "description": "",
+      "scope": "externo",
+      "ns": 1,
+      "tc": 3,
+      "ie": 3,
+      "il": 2,
+      "is_value": 2,
+      "order": 5,
+      "subfactors": [
+        {
+          "code": "vendor_lock_in-01",
+          "text": "El software reduce las dependencias de los proveedores en su entorno",
+          "citations": 0,
+          "order": 1
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "floss_case_studies",
+      "name": "Casos de estudio de adopción FLOSS",
+      "description": "",
+      "scope": "externo",
+      "ns": 1,
+      "tc": 1,
+      "ie": 3,
+      "il": 1,
+      "is_value": 2,
+      "order": 6,
+      "subfactors": [
+        {
+          "code": "floss_case_studies-01",
+          "text": "Hay informes públicos disponibles en Internet que describen el éxito de la adopción de este software",
+          "citations": 0,
+          "order": 1
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "it_centrality",
+      "name": "Centralidad de la tecnología de la información",
+      "description": "",
+      "scope": "interno",
+      "ns": 2,
+      "tc": 2,
+      "ie": 3,
+      "il": 1,
+      "is_value": 2,
+      "order": 7,
+      "subfactors": [
+        {
+          "code": "it_centrality-01",
+          "text": "La adopción de este software mejora el entorno de trabajo de los usuarios",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "it_centrality-02",
+          "text": "Centralizar la infraestructura de TI ayuda a acelerar la adopción de este software",
+          "citations": 0,
+          "order": 2
+        }
+      ]
+    },
+    {
+      "dimension": "organizational",
+      "code": "adoption_time",
+      "name": "Tiempo de adopción",
+      "description": "",
+      "scope": "interno",
+      "ns": 2,
+      "tc": 2,
+      "ie": 3,
+      "il": 1,
+      "is_value": 2,
+      "order": 8,
+      "subfactors": [
+        {
+          "code": "adoption_time-01",
+          "text": "Los requisitos de instalación y despliegue del software son fáciles de cumplir",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "adoption_time-02",
+          "text": "El tiempo requerido para adoptar este software es bajo",
+          "citations": 0,
+          "order": 2
+        }
+      ]
+    },
+    {
+      "dimension": "economic",
+      "code": "tco",
+      "name": "Coste total de propiedad",
+      "description": "",
+      "scope": "interno",
+      "ns": 2,
+      "tc": 24,
+      "ie": 3,
+      "il": 4,
+      "is_value": 3,
+      "order": 1,
+      "subfactors": [
+        {
+          "code": "tco-01",
+          "text": "Es poco probable que haya costos ocultos al adoptar este software",
+          "citations": 0,
+          "order": 1
+        },
+        {
+          "code": "tco-02",
+          "text": "La adopción de este software es menos costosa que la alternativa patentada",
+          "citations": 0,
+          "order": 2
+        }
+      ]
+    }
+  ]
+}

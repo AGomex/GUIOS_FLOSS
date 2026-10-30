@@ -2,6 +2,10 @@
 
 Fuente: `docs/source/S7-COMPONENTE PRACTICO_1.pdf`.
 
+> **Prioridad:** proyecto de universidad. Los RF son obligatorios; los RNF se
+> documentan pero **no se priorizan**. No se implementan CI, Docker, E2E,
+> reportes PDF/XLSX ni auditoría campo por campo.
+
 ## Requisitos funcionales
 
 | Código | Requisito | Módulo | Fase |

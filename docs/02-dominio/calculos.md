@@ -66,7 +66,7 @@ FODA(PM, alcance) =
   Amenaza     si PM <  umbral y alcance = externo
 ```
 
-Umbral por defecto: `3`. Es configurable por perfil.
+Umbral por defecto: `3`. Es editable en `ScoringSettings` (registro único).
 
 Alcance por defecto de cada factor (Tabla 5.4):
 
@@ -143,8 +143,9 @@ IL(r_i) = 1 si r_i <= rq1
 **Nota importante:** los valores de IL publicados en la Tabla 5.3 no se reproducen exactamente con cuartiles estándar sobre los 18 valores de `r_i` (por ejemplo, Documentación tiene `r = 1.82` y `IL = 1`). Por eso:
 
 - El sistema **siembra** los valores publicados en la Tabla 5.3.
-- El recálculo por cuartiles existe como acción administrativa explícita y documentada.
-- Cualquier cambio de IL queda registrado en la bitácora.
+- **No** se recalcula IL: la tesis es la fuente de verdad.
+- Si se editara un factor, el cambio afecta solo a las evaluaciones nuevas
+  (las anteriores conservan su snapshot).
 
 ## 9. Datos de referencia
 

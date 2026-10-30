@@ -5,7 +5,6 @@ import { Layout } from "@/app/Layout"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { Section } from "@/components/ui/Section"
-import { CriteriaTree } from "@/features/criteria/CriteriaTree"
 
 export function NuevaEvaluacion() {
   const navigate = useNavigate()
@@ -36,12 +35,9 @@ export function NuevaEvaluacion() {
         </div>
       </Section>
       <Section title="Criterios de esta evaluación">
-        <div className="tree-head">
-          <span>Dimensión / Factor / Subfactor</span>
-          <span>Aplicación</span>
-          <span>Peso</span>
-        </div>
-        <CriteriaTree relevant />
+        <p className="annotation">
+          La selección de factores relevantes y sus pesos se habilitará en la Fase 2.
+        </p>
       </Section>
       <div className="page-actions">
         <Button variant="secondary">Cancelar</Button>

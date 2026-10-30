@@ -25,7 +25,6 @@ ambos documentos.
 | `frontend/` | SPA React + Vite + TypeScript. Solo presentación y consumo de API. |
 | `docs/` | Requisitos, dominio, arquitectura y API. |
 | `reference/` | Sistema anterior y diseño de Figma. **No modificar.** |
-| `infra/` | Docker Compose y despliegue. |
 
 ## 3. Backend
 
@@ -89,9 +88,10 @@ global = Σ(PM × IR) / Σ(IR)
 ```
 
 - La tesis (Tabla 5.3) es la fuente de verdad sobre `factors.csv`.
-- Los valores de IL se siembran; el recálculo por cuartiles es una acción
-  administrativa explícita y auditada.
-- Cada evaluación guarda un snapshot del catálogo y del perfil.
+- Los valores de IL se siembran; no se recalculan.
+- Un único `ScoringSettings` editable (escala, umbral, relevancia mínima).
+- Cada evaluación guarda un snapshot JSON del catálogo y la configuración.
+- El catálogo se administra desde **Django admin**, no desde un CRUD propio.
 
 ## 6. API
 
@@ -105,11 +105,11 @@ global = Σ(PM × IR) / Σ(IR)
 
 | Nivel | Herramienta |
 |---|---|
-| Unitarias backend | pytest + pytest-django |
-| Golden del motor | pytest contra Tabla 5.3 |
-| Integración API | DRF APITestCase |
+| Motor de cálculo (obligatorio) | pytest contra la Tabla 5.3 |
 | Tipado y build frontend | tsc + vite |
-| E2E | Playwright (Fase 6) |
+
+No se escriben tests de endpoints, E2E ni integración. El único test que se
+mantiene es el del motor, porque garantiza los valores automáticos.
 
 Ningún cambio se considera terminado si `pytest`, `ruff check` o
 `npm run build` fallan.

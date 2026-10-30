@@ -14,15 +14,33 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 | Fase | Descripción | Estado |
 |---|---|---|
 | 0 | Infraestructura y reorganización | **Completada** |
-| 1 | Catálogo y softwares (RF-01, RF-02, RF-03) | Pendiente |
+| 1 | Catálogo y softwares (RF-01, RF-02, RF-03) | **Completada** |
 | 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | Pendiente |
 | 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | Pendiente |
 | 4 | Historial y trazabilidad (RF-10, RF-11) | Pendiente |
 | 5 | Comparación y dashboard (RF-12, RF-13) | Pendiente |
 | 6 | QA y RNF | Pendiente |
 
-**Próximo paso:** iniciar la Fase 1 — sembrar el catálogo (3 dimensiones, 18
-factores, 61 subfactores) y construir el CRUD de proveedores y softwares.
+**Próximo paso:** iniciar la Fase 2 — modelo de evaluación, calificación de
+subfactores y motor de cálculo con preview en vivo.
+
+---
+
+## Alcance ajustado (2026-10-29)
+
+A petición del usuario se recortó el formalismo, priorizando funcionalidad y
+automatización de valores:
+
+- **Fuera:** CI, Docker/PostgreSQL, Playwright/E2E, reportes PDF/XLSX, tests de
+  endpoints, auditoría campo por campo, perfiles versionados, hardening de
+  seguridad.
+- **Dentro:** un único test del motor de cálculo (Tabla 5.3, FODA,
+  recomendación, global) como garantía de los valores automáticos.
+- **Perfiles:** un solo `ScoringSettings` editable (escala, umbral, relevancia)
+  con snapshot por evaluación.
+- **Catálogo:** se administra desde Django admin; la UI de criterios es de solo
+  lectura con escala y umbral editables.
+- **Fases:** 5 en lugar de 6.
 
 ---
 
@@ -40,6 +58,74 @@ factores, 61 subfactores) y construir el CRUD de proveedores y softwares.
 ---
 
 ## Registro de cambios
+
+### 2026-10-29 — Fase 1 completada: catálogo y softwares
+
+**Qué se hizo**
+
+1. **Limpieza de alcance**: se eliminaron `.github/` (CI) e `infra/`
+   (docker-compose); se actualizaron `PLAN.md`, `README.md`, `AGENTS.md`,
+   `docs/01-requisitos`, `docs/02-dominio`, `docs/03-arquitectura` y
+   `docs/04-api` para reflejar 5 fases, un solo `ScoringSettings` y la ausencia
+   de CI/Docker/E2E/reportes.
+2. **Modelos** (`catalog`): `Dimension`, `Factor`, `Subfactor`,
+   `ScoringSettings` (singleton con `scale_min`, `scale_max`,
+   `foda_threshold`, `relevance_min`).
+3. **Modelos** (`software`): `Provider`, `Software` con unicidad
+   `(name, version, provider)`.
+4. **Migraciones**: `catalog.0001_initial`, `software.0001_initial`.
+5. **Datos**: `apps/catalog/data/catalog.json` generado desde
+   `guiosad_data.csv` (61 textos) + Tabla 5.3 (NS, TC, IE, IL, IS, alcance).
+   Comando idempotente `manage.py seed_catalog`.
+6. **Admin**: registro de catálogo (con subfactores inline), configuración,
+   proveedores y softwares.
+7. **API**: ViewSets de dimensiones, factores, subfactores, proveedores y
+   softwares; `GET/PATCH /catalog/settings/`; filtros, búsqueda y paginación
+   de 100.
+8. **Frontend**:
+   - `src/lib/api.ts`: cliente tipado y manejo del sobre de error;
+   - `Field` ahora soporta modo controlado y opciones;
+   - `Criterios`: árbol real 3/18/61 + edición de escala, umbral y relevancia;
+   - `Softwares`: listado real, filtros funcionales y alta desde el drawer.
+9. **Ajuste**: `NuevaEvaluacion` muestra un aviso hasta la Fase 2 (el árbol ya
+   requiere datos).
+
+**Archivos principales**
+
+- `backend/apps/catalog/{models,admin,serializers,views,urls}.py`
+- `backend/apps/catalog/data/catalog.json`
+- `backend/apps/catalog/management/commands/seed_catalog.py`
+- `backend/apps/software/{models,admin,serializers,views,urls}.py`
+- `backend/config/api_urls.py`, `backend/config/settings/base.py`
+- `frontend/src/lib/api.ts`
+- `frontend/src/features/criteria/{Criterios,CriteriaTree}.tsx`
+- `frontend/src/features/softwares/Softwares.tsx`
+- `frontend/src/components/ui/Field.tsx`
+- `frontend/src/styles/index.css`
+
+**Verificación**
+
+```text
+manage.py check .................. sin issues
+makemigrations --check ........... No changes detected
+seed_catalog (x2) ................ 3 dimensiones, 18 factores, 61 subfactores
+pytest ........................... 1 passed
+ruff check / format .............. All checks passed
+npm run typecheck ................ sin errores
+npm run build .................... ✓ built in 861 ms
+API (APIClient) .................. health 200 · dimensiones 3 · factores 18
+                                   subfactores 61 · settings 200
+                                   POST provider 201 · POST software 201
+                                   duplicado 400 con mensaje en español
+Proxy Vite 5173 → 8000 ........... health ok · dimensiones 3 · factores 18
+```
+
+**Pendiente**
+
+- Fase 2: `Evaluation`, `EvaluationFactor`, `EvaluationSubfactor`, motor de
+  cálculo, preview y golden test.
+
+---
 
 ### 2026-10-29 — Publicación en GitHub
 

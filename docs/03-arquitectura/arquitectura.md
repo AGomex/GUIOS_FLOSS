@@ -58,38 +58,36 @@ Capas:
 
 ## 4. Snapshot y trazabilidad
 
-- Al crear una evaluación se copia el catálogo y el perfil aplicados.
+- Al crear una evaluación se copia el catálogo y la configuración aplicados.
 - `EvaluationFactor` y `EvaluationSubfactor` guardan los valores usados.
-- `AuditLog` registra creación, cambios, finalización y reapertura.
+- `EvaluationLog` registra creación, finalización y reapertura (bitácora simple).
 - Editar el catálogo no altera evaluaciones anteriores (RF-11).
 
-## 5. Perfiles de configuración
+## 5. Configuración
 
-`ImportanceProfile` es versionado y define:
+Un único registro `ScoringSettings` define:
 
-- escala (mínimo, máximo, etiquetas);
-- matrices IS/IR;
-- umbral FODA;
-- modo de ponderación (`IR`, `pesos`, `simple`);
-- reglas de recomendación.
+- escala (`scale_min`, `scale_max`);
+- umbral FODA (`foda_threshold`);
+- relevancia mínima (`relevance_min`).
 
-Solo un perfil puede estar activo por defecto. Cada evaluación referencia el perfil usado.
+Las matrices IS/IR son fijas (`floor((a + b) / 2)`) y se implementan en el motor.
+Cada evaluación guarda un snapshot JSON con el catálogo y la configuración usados.
 
-## 6. Entornos
+## 6. Entorno
 
 | Entorno | Settings | Base de datos | DEBUG |
 |---|---|---|---|
 | Desarrollo | `config.settings.dev` | SQLite | Sí |
-| Producción | `config.settings.prod` | PostgreSQL | No |
 
+`config.settings.prod` se conserva como plantilla mínima, pero no se despliega.
 Variables en `.env` (ver `.env.example`).
 
 ## 7. Seguridad
 
 - Sin autenticación en el alcance inicial (S7).
-- El nombre del evaluador es texto libre y queda en la bitácora.
-- En producción: cookies seguras, `DEBUG=False`, CORS restringido.
-- Preparado para incorporar autenticación por token sin reestructurar (RNF-09).
+- El nombre del evaluador es texto libre.
+- No se implementa endurecimiento para producción.
 
 ## 8. Frontend
 
@@ -103,8 +101,7 @@ Variables en `.env` (ver `.env.example`).
 
 | Nivel | Herramienta | Ubicación |
 |---|---|---|
-| Unitarias backend | pytest + pytest-django | `backend/apps/*/tests/` |
-| Golden del motor | pytest | `backend/apps/scoring/tests/` |
-| Integración API | DRF APITestCase | `backend/apps/*/tests/` |
+| Motor de cálculo (obligatorio) | pytest | `backend/apps/scoring/tests/` |
 | Tipado y build frontend | tsc + vite | `frontend/` |
-| E2E | Playwright | Fase 6 |
+
+No hay tests de endpoints, E2E ni integración.
