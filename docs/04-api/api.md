@@ -1,0 +1,367 @@
+# API REST
+
+Base: `/api/v1/`
+Documentación interactiva: `/api/docs/` · Esquema OpenAPI: `/api/schema/`
+
+## 1. Convenciones
+
+| Tema | Convención |
+|---|---|
+| Formato | JSON (`application/json`) |
+| Fechas | ISO 8601 con zona horaria |
+| Idioma | Código y nombres de campo en inglés; mensajes en español |
+| Identificadores | Enteros autoincrementales |
+| Paginación | `PageNumberPagination`, 25 por página |
+| Filtros | `django-filter`, `search` y `ordering` |
+| Validación | En serializers (RNF-06), nunca solo en el cliente |
+| Autenticación | Ninguna en el alcance inicial |
+
+### 1.1 Respuesta paginada
+
+```json
+{
+  "count": 42,
+  "next": "http://localhost:8000/api/v1/softwares/?page=2",
+  "previous": null,
+  "results": []
+}
+```
+
+### 1.2 Sobre de error
+
+Todos los errores usan la misma estructura, producida por
+`apps.core.exceptions.api_exception_handler`.
+
+```json
+{
+  "error": {
+    "code": "invalid",
+    "message": "La versión es obligatoria.",
+    "detail": {
+      "version": ["Este campo es obligatorio."]
+    }
+  }
+}
+```
+
+| Campo | Descripción |
+|---|---|
+| `code` | Código estable de DRF (`invalid`, `not_found`, `permission_denied`, …) |
+| `message` | Primer mensaje legible, en español |
+| `detail` | Detalle completo por campo |
+
+### 1.3 Códigos de estado
+
+| Código | Uso |
+|---|---|
+| `200` | Consulta o actualización correcta |
+| `201` | Recurso creado |
+| `204` | Recurso eliminado |
+| `400` | Datos inválidos |
+| `404` | Recurso inexistente |
+| `409` | Conflicto de estado (p. ej. finalizar dos veces) |
+| `422` | Regla de negocio incumplida (p. ej. subfactores pendientes) |
+
+## 2. Recursos
+
+### 2.1 Proveedores
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/providers` | Lista con filtros `search`, `is_active` |
+| `POST` | `/providers` | Crea un proveedor |
+| `GET` | `/providers/{id}` | Detalle |
+| `PATCH` | `/providers/{id}` | Actualización parcial |
+| `DELETE` | `/providers/{id}` | Baja lógica (`is_active=false`) |
+
+```json
+{
+  "id": 1,
+  "name": "Odoo S.A.",
+  "description": "Proveedor del ERP Odoo",
+  "website": "https://www.odoo.com",
+  "is_active": true
+}
+```
+
+### 2.2 Softwares
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/softwares` | Filtros `provider`, `license_type`, `category`, `is_active`, `search` |
+| `POST` | `/softwares` | Crea un software |
+| `GET` | `/softwares/{id}` | Detalle |
+| `PATCH` | `/softwares/{id}` | Actualización parcial |
+| `DELETE` | `/softwares/{id}` | Baja lógica |
+
+Restricción de unicidad: `(name, version, provider)`.
+
+```json
+{
+  "id": 3,
+  "name": "Odoo ERP",
+  "version": "17",
+  "provider": 1,
+  "license_type": "libre",
+  "category": "ERP",
+  "description": "ERP modular de código abierto",
+  "website": "https://www.odoo.com",
+  "is_active": true
+}
+```
+
+### 2.3 Catálogo
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET/POST` | `/catalog/dimensions` | Dimensiones |
+| `GET/PATCH/DELETE` | `/catalog/dimensions/{id}` | Detalle |
+| `GET/POST` | `/catalog/factors` | Factores; filtros `dimension`, `scope`, `is_active` |
+| `GET/PATCH/DELETE` | `/catalog/factors/{id}` | Detalle |
+| `GET/POST` | `/catalog/subfactors` | Subfactores; filtro `factor` |
+| `GET/PATCH/DELETE` | `/catalog/subfactors/{id}` | Detalle |
+| `GET/POST` | `/catalog/scales` | Escalas |
+| `GET/POST` | `/catalog/profiles` | Perfiles de importancia |
+| `POST` | `/catalog/profiles/{id}/activate` | Marca el perfil como predeterminado |
+
+Factor:
+
+```json
+{
+  "id": 1,
+  "dimension": 1,
+  "code": "compatibility",
+  "name": "Compatibilidad",
+  "description": "Capacidad de interactuar con otros sistemas",
+  "scope": "externo",
+  "ns": 8,
+  "tc": 33,
+  "ie": 3,
+  "il": 3,
+  "is_value": 3,
+  "order": 1,
+  "is_active": true
+}
+```
+
+Perfil:
+
+```json
+{
+  "id": 1,
+  "name": "GUIOS (tesis)",
+  "version": "1.0",
+  "scale": 1,
+  "is_matrix": [[1, 1, 2, 2], [1, 2, 2, 3], [2, 2, 3, 3], [2, 3, 3, 4]],
+  "ir_matrix": [[1, 1, 2, 2], [1, 2, 2, 3], [2, 2, 3, 3], [2, 3, 3, 4]],
+  "foda_threshold": "3.00",
+  "weighting_mode": "ir",
+  "recommendation_rules": {
+    "C": "IR >= 3 en Debilidad o Amenaza",
+    "B": "IR = 2 en Debilidad o Amenaza",
+    "A": "sin Debilidad ni Amenaza relevante"
+  },
+  "is_default": true,
+  "is_active": true
+}
+```
+
+### 2.4 Evaluaciones
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/evaluations` | Filtros `status`, `software`, `evaluator`, `organization`, `created_at` |
+| `POST` | `/evaluations` | Crea la evaluación y su snapshot |
+| `GET` | `/evaluations/{id}` | Detalle con configuración |
+| `PATCH` | `/evaluations/{id}` | Solo en estado `borrador` |
+| `GET/PUT` | `/evaluations/{id}/config` | Factores y alcance aplicados |
+| `GET/PUT` | `/evaluations/{id}/scores` | Calificaciones PS por subfactor |
+| `POST` | `/evaluations/{id}/preview` | Calcula sin persistir resultados |
+| `POST` | `/evaluations/{id}/finalize` | Valida y persiste resultados |
+| `POST` | `/evaluations/{id}/reopen` | Reabre con motivo obligatorio |
+| `GET` | `/evaluations/{id}/results` | Resultados, FODA y recomendación |
+| `GET` | `/evaluations/{id}/audit` | Bitácora de cambios |
+
+Estados: `borrador`, `en_evaluacion`, `finalizada`, `cancelada`, `reabierta`.
+
+Crear evaluación:
+
+```http
+POST /api/v1/evaluations
+Content-Type: application/json
+
+{
+  "software": 3,
+  "evaluator": "Carlos Mendoza",
+  "organization": "Dirección Financiera",
+  "need": "Gestión contable e inventario",
+  "profile": 1
+}
+```
+
+```json
+{
+  "id": 5,
+  "code": "EV-005",
+  "software": 3,
+  "software_name": "Odoo ERP v17",
+  "evaluator": "Carlos Mendoza",
+  "organization": "Dirección Financiera",
+  "need": "Gestión contable e inventario",
+  "status": "borrador",
+  "profile": 1,
+  "profile_version": "1.0",
+  "created_at": "2026-09-28T10:15:00-05:00"
+}
+```
+
+Guardar calificaciones:
+
+```http
+PUT /api/v1/evaluations/5/scores
+Content-Type: application/json
+
+{
+  "scores": [
+    {"subfactor": 1, "ps": 4, "source": "Observación directa", "note": ""},
+    {"subfactor": 2, "ps": 3, "source": "Información del proveedor", "note": ""}
+  ]
+}
+```
+
+Previsualización:
+
+```http
+POST /api/v1/evaluations/5/preview
+```
+
+```json
+{
+  "global": "3.25",
+  "percentage": "75.00",
+  "score_5": "4.00",
+  "factors": [
+    {
+      "factor": 1,
+      "name": "Compatibilidad",
+      "dimension": "Tecnológica",
+      "scope": "externo",
+      "is_value": 3,
+      "id_value": 3,
+      "ir": 3,
+      "is_relevant": true,
+      "pm": "3.63",
+      "weight": "3",
+      "foda": "oportunidad"
+    }
+  ],
+  "swot": {
+    "strengths": [],
+    "opportunities": ["Compatibilidad"],
+    "weaknesses": ["Soporte"],
+    "threats": []
+  },
+  "recommendation": {
+    "code": "B",
+    "label": "Adoptar con reservas",
+    "reasons": ["Soporte es Debilidad con IR = 2"]
+  },
+  "pending": 0
+}
+```
+
+Finalizar:
+
+```http
+POST /api/v1/evaluations/5/finalize
+```
+
+- `422` si quedan subfactores pendientes o no hay factores relevantes.
+- `409` si la evaluación ya está finalizada.
+
+Reabrir:
+
+```http
+POST /api/v1/evaluations/5/reopen
+Content-Type: application/json
+
+{"reason": "Se recibió nueva evidencia de soporte técnico."}
+```
+
+`reason` es obligatorio y queda en la bitácora.
+
+### 2.5 Comparación
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/comparisons` | Comparaciones guardadas |
+| `POST` | `/comparisons` | Crea una comparación de 2 a 3 evaluaciones |
+| `GET` | `/comparisons/{id}` | Detalle |
+
+```json
+{
+  "need": "Gestión contable e inventario",
+  "evaluations": [5, 6, 7]
+}
+```
+
+Si las evaluaciones usan perfiles distintos, la respuesta incluye
+`"normalized": true` y `"warnings": ["Las escalas se normalizaron a porcentaje."]`.
+
+### 2.6 Dashboard y reportes
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/dashboard/summary` | Totales, estados, recomendaciones y promedios |
+| `GET` | `/reports/{evaluation_id}?format=pdf\|xlsx` | Reporte descargable |
+
+```json
+{
+  "softwares": {"total": 9, "evaluated": 6},
+  "evaluations": {"draft": 1, "in_progress": 2, "finished": 4, "cancelled": 0},
+  "recommendations": {"A": 1, "B": 2, "C": 1},
+  "average_score": "3.68",
+  "recent": []
+}
+```
+
+### 2.7 Salud
+
+```http
+GET /api/v1/health/
+```
+
+```json
+{"status": "ok", "service": "guiospro-floss-api"}
+```
+
+## 3. Reglas de validación
+
+| Regla | Respuesta |
+|---|---|
+| `PS` fuera de la escala del perfil | `400` |
+| Subfactor que no pertenece a un factor relevante | `400` |
+| Evaluación finalizada editada | `409` |
+| Reapertura sin motivo | `400` |
+| Comparación con menos de 2 o más de 3 evaluaciones | `400` |
+| Comparación de evaluaciones de necesidades distintas | `400` |
+| Finalizar con subfactores pendientes | `422` |
+| Finalizar sin factores relevantes | `422` |
+
+## 4. Ejemplo de consumo (frontend)
+
+```ts
+const response = await fetch("/api/v1/evaluations/5/preview", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+});
+
+if (!response.ok) {
+  const { error } = await response.json();
+  throw new Error(error.message);
+}
+
+const result = await response.json();
+```
+
+El cliente centralizado vive en `frontend/src/lib/api.ts` (Fase 1).

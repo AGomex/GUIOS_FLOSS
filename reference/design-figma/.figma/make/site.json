@@ -1,0 +1,10 @@
+{
+  "description": "Streamlines software suitability evaluations for organizations with tools to assess, score, compare, and track software performance and recommendations.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
