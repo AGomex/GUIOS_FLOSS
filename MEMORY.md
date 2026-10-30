@@ -66,10 +66,15 @@ factores, 61 subfactores) y construir el CRUD de proveedores y softwares.
 
 - `git ls-files "*.pdf"` → sin resultados.
 - `git ls-remote origin` → vacío antes del push.
+- Después del push: `origin/main` apunta a `95e13db` y
+  `git ls-tree -r origin/main | grep .pdf` no devuelve nada.
 
 **Resultado**
 
-- Push pendiente de ejecutar.
+- Publicado en https://github.com/AGomex/GUIOS_FLOSS (público).
+- Rama `main` con seguimiento de `origin/main`.
+- Commit publicado: `95e13db chore: inicializa estructura del proyecto y cierra fase 0`.
+- Sin PDFs en el historial.
 
 ---
 
