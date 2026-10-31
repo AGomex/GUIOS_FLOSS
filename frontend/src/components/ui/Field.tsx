@@ -42,7 +42,7 @@ export function Field({
       <span>{label}</span>
       {kind === "select" ? (
         <select {...common}>
-          <option value="" disabled>
+          <option value="">
             {placeholder || "Seleccionar"}
           </option>
           {(options ?? []).map((option) => (

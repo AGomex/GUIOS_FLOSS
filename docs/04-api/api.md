@@ -312,7 +312,24 @@ GET /api/v1/evaluations/5/results
 ```
 
 Devuelve la evaluación, el resultado global, la recomendación, el resumen FODA,
-los conteos y el detalle de los factores con su PM y clasificación.
+los conteos, la escala aplicada, el desempeño por dimensión y el detalle de los
+factores con su PM y clasificación.
+
+```json
+{
+  "global": "3.87",
+  "percentage": "95.56",
+  "score_5": "4.82",
+  "scale": {"min": 1, "max": 4, "foda_threshold": "3.00"},
+  "dimensions": [
+    {"name": "Tecnológica", "average": "4.00", "percentage": "100.00", "factors": 9}
+  ],
+  "recommendation": {"code": "C", "label": "Proporcionar recursos y mejorar", "reasons": ["…"]},
+  "swot": {"fortalezas": ["…"], "oportunidades": ["…"], "debilidades": ["…"], "amenazas": []},
+  "counts": {"strengths": 7, "opportunities": 10, "weaknesses": 1, "threats": 0},
+  "factors": [{"name": "Compatibilidad", "pm": "3.63", "ir": 3, "foda": "oportunidad"}]
+}
+```
 
 Reabrir (Fase 4):
 

@@ -217,6 +217,13 @@ export type ResultFactor = {
   weight: number
 }
 
+export type ResultDimension = {
+  name: string
+  average: string | null
+  percentage: string | null
+  factors: number
+}
+
 export type EvaluationResults = {
   evaluation: {
     id: number
@@ -233,6 +240,11 @@ export type EvaluationResults = {
   global: string
   percentage: string
   score_5: string
+  scale: {
+    min: number
+    max: number
+    foda_threshold: string
+  }
   recommendation: {
     code: "A" | "B" | "C"
     label: string
@@ -245,6 +257,7 @@ export type EvaluationResults = {
     weaknesses: number
     threats: number
   }
+  dimensions: ResultDimension[]
   factors: ResultFactor[]
 }
 

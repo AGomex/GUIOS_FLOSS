@@ -16,12 +16,12 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 | 0 | Infraestructura y reorganización | **Completada** |
 | 1 | Catálogo y softwares (RF-01, RF-02, RF-03) | **Completada** |
 | 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | **Completada** |
-| 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | Pendiente |
+| 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | **Completada** |
 | 4 | Historial y trazabilidad (RF-10, RF-11) | Pendiente |
 | 5 | Comparación y dashboard (RF-12, RF-13) | Pendiente |
 
-**Próximo paso:** iniciar la Fase 3 — resultados con gráficos, FODA y
-recomendación justificada, e historial básico de evaluaciones.
+**Próximo paso:** iniciar la Fase 4 — historial de evaluaciones con detalle,
+reapertura con motivo y bitácora simple.
 
 ---
 
@@ -58,6 +58,58 @@ automatización de valores:
 ---
 
 ## Registro de cambios
+
+### 2026-10-30 — Fase 3 completada: resultados, gráficos y recomendación
+
+**Qué se hizo**
+
+1. **Backend**: `results_payload` ahora incluye la escala aplicada
+   (`min`, `max`, `foda_threshold`), el desempeño por dimensión y el detalle de
+   factores. El promedio por dimensión se calcula como
+   `Σ(PM × IR) / Σ(IR)` sobre los factores relevantes de la dimensión.
+2. **RadarChart**: componente SVG dinámico para 3 o más dimensiones, con
+   etiquetas, valores, anillos y puntos; conserva el modo estático usado por la
+   comparación.
+3. **FactorBars**: barras dinámicas por factor, con color según el PM y la escala.
+4. **Resultados**:
+   - resultado global con color según el puntaje y detalle de escala/porcentaje;
+   - recomendación A/B/C con justificación y conteos FODA;
+   - radar por dimensión y barras de factores ordenadas de menor a mayor PM;
+   - matriz FODA con los factores y su PM;
+   - tabla de factores filtrable por dimensión y por relevancia;
+   - necesidad evaluada, evaluador, organización y enlace a la calificación.
+5. **UI**: el placeholder de los selects ya puede seleccionarse para limpiar
+   filtros; estilos para radar, barras, conteos y filtros.
+
+**Archivos principales**
+
+- `backend/apps/evaluation/services.py`
+- `frontend/src/components/charts/{RadarChart,FactorBars}.tsx`
+- `frontend/src/features/results/Resultados.tsx`
+- `frontend/src/components/ui/Field.tsx`
+- `frontend/src/lib/api.ts`
+- `frontend/src/styles/index.css`
+- `docs/02-dominio/calculos.md`, `docs/04-api/api.md`
+
+**Verificación**
+
+```text
+manage.py check .................. sin issues
+pytest ........................... 61 passed
+ruff check / format .............. All checks passed
+npm run typecheck ................ sin errores
+npm run build .................... ✓ built
+GET /evaluations/1/results/ ...... 200 · scale + 3 dimensiones + 18 factores
+Dimensiones EV-001 ............... Tecnológica 4.00 · Organizacional 3.68 · Económica 4.00
+Recomendación EV-001 ............. C · 7 fortalezas · 10 oportunidades · 1 debilidad
+```
+
+**Pendiente**
+
+- Fase 4: historial con detalle, reapertura con motivo y bitácora.
+- Fase 5: comparación de 2–3 evaluaciones y dashboard con datos reales.
+
+---
 
 ### 2026-10-30 — Fase 2 completada: evaluación, cálculo y preview
 

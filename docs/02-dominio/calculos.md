@@ -108,6 +108,18 @@ score5 = 1 + 4 × pct / 100
 
 Ejemplo con escala 1–4: `global = 3.25` → `pct = 75 %` → `score5 = 4.00`.
 
+### 6.1 Desempeño por dimensión
+
+Para los gráficos de la pantalla de resultados se usa el mismo criterio ponderado,
+aplicado a los factores relevantes de cada dimensión:
+
+```text
+dimension = Σ(PM_i × IR_i) / Σ(IR_i)     sobre factores relevantes de la dimensión
+```
+
+El resultado se presenta en la escala original y en porcentaje. Es un indicador
+de presentación: no altera el resultado global ni la recomendación.
+
 ## 7. Ejemplo completo
 
 Factor **Compatibilidad** (externo):

@@ -6,7 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.catalog.models import Factor, ScoringSettings
-from apps.scoring.engine import FactorInput, evaluate, importance
+from apps.scoring.engine import FactorInput, evaluate, importance, round2
 
 from .models import Evaluation, EvaluationFactor, EvaluationResult, EvaluationSubfactor
 
@@ -275,6 +275,46 @@ def finalize(evaluation: Evaluation) -> dict:
     return json_safe(result)
 
 
+def _dimension_summary(
+    evaluation: Evaluation, factors: list[dict], scale_min, scale_max
+) -> list[dict]:
+    """Promedio ponderado por IR de los factores relevantes de cada dimensión."""
+    order: list[str] = []
+    for item in evaluation.config_snapshot.get("factors", []):
+        name = item.get("dimension")
+        if name and name not in order:
+            order.append(name)
+    for factor in factors:
+        if factor["dimension"] not in order:
+            order.append(factor["dimension"])
+
+    summary = []
+    for name in order:
+        items = [
+            factor
+            for factor in factors
+            if factor["dimension"] == name and factor["is_relevant"] and factor["pm"] is not None
+        ]
+        average = None
+        percentage = None
+        if items:
+            total_weight = sum(factor["ir"] for factor in items)
+            weighted = sum(Decimal(factor["pm"]) * factor["ir"] for factor in items)
+            average = round2(weighted / total_weight)
+            percentage = round2(
+                (average - Decimal(scale_min)) / (Decimal(scale_max) - Decimal(scale_min)) * 100
+            )
+        summary.append(
+            {
+                "name": name,
+                "average": format(average, "f") if average is not None else None,
+                "percentage": format(percentage, "f") if percentage is not None else None,
+                "factors": len(items),
+            }
+        )
+    return summary
+
+
 def results_payload(evaluation: Evaluation) -> dict:
     result = evaluation.result
     foda_labels = {
@@ -298,6 +338,9 @@ def results_payload(evaluation: Evaluation) -> dict:
         }
         for factor in evaluation.factors.all()
     ]
+    settings = evaluation.config_snapshot.get("settings", {})
+    scale_min = int(settings.get("scale_min", 1))
+    scale_max = int(settings.get("scale_max", 4))
     return {
         "evaluation": {
             "id": evaluation.id,
@@ -314,6 +357,11 @@ def results_payload(evaluation: Evaluation) -> dict:
         "global": format(result.global_score, "f"),
         "percentage": format(result.percentage, "f"),
         "score_5": format(result.score_5, "f"),
+        "scale": {
+            "min": scale_min,
+            "max": scale_max,
+            "foda_threshold": str(settings.get("foda_threshold", "3.00")),
+        },
         "recommendation": {
             "code": result.recommendation,
             "label": result.get_recommendation_display(),
@@ -326,5 +374,6 @@ def results_payload(evaluation: Evaluation) -> dict:
             "weaknesses": result.weaknesses,
             "threats": result.threats,
         },
+        "dimensions": _dimension_summary(evaluation, factors, scale_min, scale_max),
         "factors": factors,
     }
