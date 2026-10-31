@@ -443,3 +443,28 @@ tbody tr:hover { background: #f8fafc; }
   .recommendation-head { align-items: flex-start; flex-direction: column; }
   .result-filters .field { width: 100%; }
 }
+
+/* ---------------------------------------------------------------------------
+   Historial y bitácora (Fase 4)
+   --------------------------------------------------------------------------- */
+.header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.cell-stack { display: grid; gap: 2px; }
+.cell-stack small { color: var(--muted); font-size: 9px; }
+.filters--history { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+tbody tr.row--clickable { cursor: pointer; }
+tbody tr.row--active { background: #eef4fb; box-shadow: inset 3px 0 0 var(--blue); }
+.detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin: 14px 0; }
+.detail-meta div { display: grid; gap: 3px; min-width: 0; }
+.detail-meta span { color: var(--muted); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; }
+.detail-meta strong { color: var(--navy); font-size: 11px; overflow-wrap: anywhere; }
+.drawer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.drawer-actions .button { margin-top: 0; width: auto; }
+
+@media (max-width: 1024px) {
+  .filters--history { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 720px) {
+  .filters--history { grid-template-columns: 1fr; }
+  .detail-meta { grid-template-columns: 1fr; }
+}

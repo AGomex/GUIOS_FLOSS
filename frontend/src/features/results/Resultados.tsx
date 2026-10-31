@@ -46,6 +46,15 @@ function scoreTone(score: number) {
   return "red"
 }
 
+function statusTone(
+  status: string,
+): "green" | "amber" | "blue" | "neutral" {
+  if (status === "finalizada") return "green"
+  if (status === "reabierta") return "amber"
+  if (status === "en_evaluacion") return "blue"
+  return "neutral"
+}
+
 function fodaStatus(factor: ResultFactor) {
   if (!factor.foda) return <Status tone="neutral">—</Status>
   return (
@@ -187,7 +196,9 @@ export function Resultados() {
             {evaluation.software} · versión {evaluation.software_version}
           </strong>
         </div>
-        <Status tone="green">{evaluation.status_label}</Status>
+        <Status tone={statusTone(evaluation.status)}>
+          {evaluation.status_label}
+        </Status>
         <div>
           <span className="eyebrow">Evaluación</span>
           <strong>{evaluation.code}</strong>

@@ -8,7 +8,13 @@ from django.utils import timezone
 from apps.catalog.models import Factor, ScoringSettings
 from apps.scoring.engine import FactorInput, evaluate, importance, round2
 
-from .models import Evaluation, EvaluationFactor, EvaluationResult, EvaluationSubfactor
+from .models import (
+    Evaluation,
+    EvaluationFactor,
+    EvaluationLog,
+    EvaluationResult,
+    EvaluationSubfactor,
+)
 
 
 class EvaluationError(Exception):
@@ -46,6 +52,24 @@ def json_safe(value):
     if isinstance(value, (list, tuple)):
         return [json_safe(item) for item in value]
     return value
+
+
+def log_event(
+    evaluation: Evaluation,
+    action: str,
+    description: str = "",
+    *,
+    reason: str = "",
+    actor: str = "",
+) -> EvaluationLog:
+    """Registra una entrada en la bitácora de la evaluación."""
+    return EvaluationLog.objects.create(
+        evaluation=evaluation,
+        action=action,
+        description=description,
+        reason=reason,
+        actor=actor,
+    )
 
 
 @transaction.atomic
@@ -123,6 +147,12 @@ def create_evaluation(*, software, evaluator, organization="", need) -> Evaluati
         "captured_at": timezone.now().isoformat(),
     }
     evaluation.save(update_fields=["config_snapshot", "updated_at"])
+    log_event(
+        evaluation,
+        EvaluationLog.Action.CREATED,
+        f"Evaluación creada para {software.name} {software.version}.".strip(),
+        actor=evaluator,
+    )
     return evaluation
 
 
@@ -184,6 +214,14 @@ def apply_config(evaluation: Evaluation, items: list[dict]) -> None:
         factor.weight = factor.ir if factor.is_relevant else 0
         factor.save()
 
+    if items:
+        log_event(
+            evaluation,
+            EvaluationLog.Action.CONFIGURED,
+            f"Configuración actualizada en {len(items)} factores.",
+            actor=evaluation.evaluator,
+        )
+
 
 @transaction.atomic
 def apply_scores(evaluation: Evaluation, items: list[dict]) -> None:
@@ -219,6 +257,21 @@ def apply_scores(evaluation: Evaluation, items: list[dict]) -> None:
     if evaluation.status == Evaluation.Status.DRAFT:
         evaluation.status = Evaluation.Status.IN_PROGRESS
         evaluation.save(update_fields=["status", "updated_at"])
+        log_event(
+            evaluation,
+            EvaluationLog.Action.UPDATED,
+            "Estado: Borrador → En evaluación.",
+            actor=evaluation.evaluator,
+        )
+
+    scored = sum(1 for item in items if item.get("ps") is not None)
+    if items:
+        log_event(
+            evaluation,
+            EvaluationLog.Action.SCORED,
+            f"Calificación actualizada en {len(items)} subfactores ({scored} con valor).",
+            actor=evaluation.evaluator,
+        )
 
 
 @transaction.atomic
@@ -272,7 +325,38 @@ def finalize(evaluation: Evaluation) -> dict:
 
     evaluation.status = Evaluation.Status.FINISHED
     evaluation.save(update_fields=["status", "updated_at"])
+    log_event(
+        evaluation,
+        EvaluationLog.Action.FINALIZED,
+        (
+            f"Evaluación finalizada con resultado {result['score_5']} / 5 "
+            f"y recomendación {result['recommendation']['code']}."
+        ),
+        actor=evaluation.evaluator,
+    )
     return json_safe(result)
+
+
+@transaction.atomic
+def reopen(evaluation: Evaluation, *, reason: str, actor: str = "") -> Evaluation:
+    """Reabre una evaluación finalizada exigiendo un motivo."""
+    if evaluation.status != Evaluation.Status.FINISHED:
+        raise EvaluationStateError("Solo se pueden reabrir evaluaciones finalizadas.")
+
+    reason = (reason or "").strip()
+    if len(reason) < 5:
+        raise EvaluationError("El motivo de la reapertura debe tener al menos 5 caracteres.")
+
+    evaluation.status = Evaluation.Status.REOPENED
+    evaluation.save(update_fields=["status", "updated_at"])
+    log_event(
+        evaluation,
+        EvaluationLog.Action.REOPENED,
+        "Evaluación reabierta para revisión.",
+        reason=reason,
+        actor=actor or evaluation.evaluator,
+    )
+    return evaluation
 
 
 def _dimension_summary(

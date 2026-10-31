@@ -4,13 +4,15 @@ type DataTableProps = {
   headers: string[]
   rows: ReactNode[][]
   selectable?: boolean
-  onRowClick?: () => void
+  activeRow?: number
+  onRowClick?: (rowIndex: number) => void
 }
 
 export function DataTable({
   headers,
   rows,
   selectable = false,
+  activeRow,
   onRowClick,
 }: DataTableProps) {
   return (
@@ -30,7 +32,16 @@ export function DataTable({
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} onClick={onRowClick}>
+            <tr
+              className={[
+                onRowClick ? "row--clickable" : "",
+                activeRow === rowIndex ? "row--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              key={rowIndex}
+              onClick={() => onRowClick?.(rowIndex)}
+            >
               {selectable && (
                 <td className="check-cell">
                   <input

@@ -54,6 +54,37 @@ class Evaluation(TimeStampedModel):
         return f"EV-{last + 1:03d}"
 
 
+class EvaluationLog(TimeStampedModel):
+    """Entrada de bitácora de una evaluación."""
+
+    class Action(models.TextChoices):
+        CREATED = "created", "Creación"
+        CONFIGURED = "configured", "Configuración"
+        SCORED = "scored", "Calificación"
+        FINALIZED = "finalized", "Finalización"
+        REOPENED = "reopened", "Reapertura"
+        UPDATED = "updated", "Actualización"
+
+    evaluation = models.ForeignKey(
+        Evaluation,
+        on_delete=models.CASCADE,
+        related_name="logs",
+        verbose_name="evaluación",
+    )
+    action = models.CharField("acción", max_length=20, choices=Action.choices)
+    description = models.CharField("descripción", max_length=255, blank=True)
+    reason = models.TextField("motivo", blank=True)
+    actor = models.CharField("responsable", max_length=120, blank=True)
+
+    class Meta:
+        verbose_name = "entrada de bitácora"
+        verbose_name_plural = "bitácora"
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        return f"{self.evaluation.code} · {self.get_action_display()}"
+
+
 class EvaluationFactor(TimeStampedModel):
     """Copia del factor de catálogo aplicada a una evaluación."""
 

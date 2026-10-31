@@ -4,7 +4,7 @@ Plan maestro del sistema de evaluación de adopción de software libre (FLOSS).
 
 - **Versión:** 2.0 (alcance ajustado)
 - **Fecha:** 2026-10-29
-- **Estado:** Fases 0, 1, 2 y 3 completadas · Fase 4 pendiente
+- **Estado:** Fases 0, 1, 2, 3 y 4 completadas · Fase 5 pendiente
 - **Bitácora de cambios:** [`MEMORY.md`](./MEMORY.md)
 
 > **Nota de alcance:** proyecto de universidad. Se prioriza la funcionalidad y
@@ -310,7 +310,7 @@ solo lectura y permite editar escala y umbral.
 | 1 | RF-01, RF-02, RF-03 | Catálogo 3/18/61, settings, CRUD de software y proveedor, UI | Completada |
 | 2 | RF-04, RF-05, RF-06 | Evaluación, calificación, motor y preview | Completada |
 | 3 | RF-07, RF-08, RF-09 | Resultados, gráficos, FODA y recomendación | Completada |
-| 4 | RF-10, RF-11 | Historial, detalle y reapertura | En ejecución |
+| 4 | RF-10, RF-11 | Historial, detalle y reapertura | Completada |
 | 5 | RF-12, RF-13 | Comparación, dashboard y pulido | Pendiente |
 
 ### Criterios de aceptación

@@ -2,7 +2,13 @@
 
 from django.contrib import admin
 
-from .models import Evaluation, EvaluationFactor, EvaluationResult, EvaluationSubfactor
+from .models import (
+    Evaluation,
+    EvaluationFactor,
+    EvaluationLog,
+    EvaluationResult,
+    EvaluationSubfactor,
+)
 
 
 class EvaluationSubfactorInline(admin.TabularInline):
@@ -64,3 +70,25 @@ class EvaluationResultAdmin(admin.ModelAdmin):
         "recommendation",
     )
     list_filter = ("recommendation",)
+
+
+@admin.register(EvaluationLog)
+class EvaluationLogAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "evaluation", "action", "description", "actor")
+    list_filter = ("action", "evaluation")
+    search_fields = ("evaluation__code", "description", "reason", "actor")
+    readonly_fields = (
+        "evaluation",
+        "action",
+        "description",
+        "reason",
+        "actor",
+        "created_at",
+        "updated_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

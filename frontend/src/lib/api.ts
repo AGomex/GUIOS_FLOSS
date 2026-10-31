@@ -98,14 +98,34 @@ export type EvaluationSummary = {
   code: string
   software: number
   software_label: string
+  software_version: string
+  provider_name: string
   evaluator: string
   organization: string
   need: string
   status: EvaluationStatus
   status_label: string
   score_5: string | null
+  recommendation: "A" | "B" | "C" | null
+  recommendation_label: string | null
   created_at: string
   updated_at: string
+}
+
+export type EvaluationLog = {
+  id: number
+  action:
+    | "created"
+    | "configured"
+    | "scored"
+    | "finalized"
+    | "reopened"
+    | "updated"
+  action_label: string
+  description: string
+  reason: string
+  actor: string
+  created_at: string
 }
 
 export type EvaluationSubfactor = {
@@ -303,7 +323,19 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
-  evaluations: () => request<Paginated<EvaluationSummary>>("/evaluations/"),
+  evaluations: (params?: {
+    status?: string
+    software?: string
+    evaluator?: string
+    search?: string
+  }) => {
+    const query = new URLSearchParams()
+    Object.entries(params ?? {}).forEach(([key, value]) => {
+      if (value) query.set(key, value)
+    })
+    const suffix = query.toString() ? `?${query.toString()}` : ""
+    return request<Paginated<EvaluationSummary>>(`/evaluations/${suffix}`)
+  },
   evaluation: (id: number) => request<EvaluationDetail>(`/evaluations/${id}/`),
   createEvaluation: (data: EvaluationInput) =>
     request<EvaluationDetail>("/evaluations/", {
@@ -336,4 +368,11 @@ export const api = {
     ),
   evaluationResults: (id: number) =>
     request<EvaluationResults>(`/evaluations/${id}/results/`),
+  evaluationLogs: (id: number) =>
+    request<EvaluationLog[]>(`/evaluations/${id}/logs/`),
+  reopenEvaluation: (id: number, reason: string, actor = "") =>
+    request<EvaluationDetail>(`/evaluations/${id}/reopen/`, {
+      method: "POST",
+      body: JSON.stringify({ reason, actor }),
+    }),
 }

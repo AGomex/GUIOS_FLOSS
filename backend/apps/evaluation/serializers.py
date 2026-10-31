@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from apps.software.models import Software
 
-from .models import Evaluation, EvaluationFactor, EvaluationSubfactor
+from .models import Evaluation, EvaluationFactor, EvaluationLog, EvaluationSubfactor
 
 FODA_LABELS = {
     "fortaleza": "Fortaleza",
@@ -63,8 +63,12 @@ class EvaluationFactorSerializer(serializers.ModelSerializer):
 
 class EvaluationListSerializer(serializers.ModelSerializer):
     software_label = serializers.CharField(source="software", read_only=True)
+    software_version = serializers.CharField(source="software.version", read_only=True)
+    provider_name = serializers.CharField(source="software.provider.name", read_only=True)
     status_label = serializers.CharField(source="get_status_display", read_only=True)
     score_5 = serializers.SerializerMethodField()
+    recommendation = serializers.SerializerMethodField()
+    recommendation_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Evaluation
@@ -73,12 +77,16 @@ class EvaluationListSerializer(serializers.ModelSerializer):
             "code",
             "software",
             "software_label",
+            "software_version",
+            "provider_name",
             "evaluator",
             "organization",
             "need",
             "status",
             "status_label",
             "score_5",
+            "recommendation",
+            "recommendation_label",
             "created_at",
             "updated_at",
         ]
@@ -86,6 +94,14 @@ class EvaluationListSerializer(serializers.ModelSerializer):
     def get_score_5(self, obj):
         result = getattr(obj, "result", None)
         return format(result.score_5, "f") if result else None
+
+    def get_recommendation(self, obj):
+        result = getattr(obj, "result", None)
+        return result.recommendation if result else None
+
+    def get_recommendation_label(self, obj):
+        result = getattr(obj, "result", None)
+        return result.get_recommendation_display() if result else None
 
 
 class EvaluationDetailSerializer(EvaluationListSerializer):
@@ -124,3 +140,16 @@ class ScoreItemSerializer(serializers.Serializer):
 
 class ScoresSerializer(serializers.Serializer):
     scores = ScoreItemSerializer(many=True)
+
+
+class EvaluationLogSerializer(serializers.ModelSerializer):
+    action_label = serializers.CharField(source="get_action_display", read_only=True)
+
+    class Meta:
+        model = EvaluationLog
+        fields = ["id", "action", "action_label", "description", "reason", "actor", "created_at"]
+
+
+class ReopenSerializer(serializers.Serializer):
+    reason = serializers.CharField(min_length=5, max_length=500, trim_whitespace=True)
+    actor = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")

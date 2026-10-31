@@ -48,6 +48,8 @@ Capas:
 4. POST /evaluations/{id}/preview → calcula PM/FODA sin persistir
 5. POST /evaluations/{id}/finalize → valida, calcula y guarda resultados
 6. GET  /evaluations/{id}/results → devuelve resultados y justificación
+7. POST /evaluations/{id}/reopen  → reabre con motivo obligatorio
+8. GET  /evaluations/{id}/logs    → bitácora de cambios
 ```
 
 ## 3. Motor de cálculo
@@ -61,7 +63,8 @@ Capas:
 
 - Al crear una evaluación se copia el catálogo y la configuración aplicados.
 - `EvaluationFactor` y `EvaluationSubfactor` guardan los valores usados.
-- `EvaluationLog` registrará creación, finalización y reapertura (Fase 4).
+- `EvaluationLog` registra creación, configuración, calificación, finalización y
+  reapertura, con responsable, descripción y motivo cuando aplica (Fase 4).
 - Editar el catálogo no altera evaluaciones anteriores (RF-11).
 
 ## 5. Configuración

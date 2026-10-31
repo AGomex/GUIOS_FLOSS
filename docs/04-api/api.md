@@ -157,7 +157,7 @@ Configuración:
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/evaluations` | Filtros `status`, `software`, búsqueda por código/evaluador/necesidad |
+| `GET` | `/evaluations` | Filtros `status`, `software`, `software__provider`, `evaluator`, búsqueda por código/evaluador/necesidad |
 | `POST` | `/evaluations` | Crea la evaluación y su snapshot |
 | `GET` | `/evaluations/{id}` | Detalle con factores y subfactores aplicados |
 | `PATCH` | `/evaluations/{id}` | Edita datos generales mientras no esté finalizada |
@@ -166,8 +166,8 @@ Configuración:
 | `POST` | `/evaluations/{id}/preview` | Calcula sin persistir resultados |
 | `POST` | `/evaluations/{id}/finalize` | Valida y persiste resultados |
 | `GET` | `/evaluations/{id}/results` | Resultados, FODA, recomendación y factores |
-| `POST` | `/evaluations/{id}/reopen` | Reabre con motivo (Fase 4) |
-| `GET` | `/evaluations/{id}/audit` | Bitácora de cambios (Fase 4) |
+| `POST` | `/evaluations/{id}/reopen` | Reabre una evaluación finalizada con motivo obligatorio |
+| `GET` | `/evaluations/{id}/logs` | Bitácora de cambios de la evaluación |
 
 Estados: `borrador`, `en_evaluacion`, `finalizada`, `cancelada`, `reabierta`.
 
@@ -191,12 +191,16 @@ Content-Type: application/json
   "code": "EV-005",
   "software": 3,
   "software_label": "Odoo ERP v17",
+  "software_version": "17",
+  "provider_name": "Odoo S.A.",
   "evaluator": "Carlos Mendoza",
   "organization": "Dirección Financiera",
   "need": "Gestión contable e inventario",
   "status": "borrador",
   "status_label": "Borrador",
   "score_5": null,
+  "recommendation": null,
+  "recommendation_label": null,
   "created_at": "2026-09-28T10:15:00-05:00",
   "factors": [
     {
@@ -331,16 +335,45 @@ factores con su PM y clasificación.
 }
 ```
 
-Reabrir (Fase 4):
+Reabrir:
 
 ```http
 POST /api/v1/evaluations/5/reopen
 Content-Type: application/json
 
-{"reason": "Se recibió nueva evidencia de soporte técnico."}
+{"reason": "Se recibió nueva evidencia de soporte técnico.", "actor": "Carlos Mendoza"}
 ```
 
-`reason` es obligatorio y queda en la bitácora.
+- `200` con la evaluación en estado `reabierta`.
+- `400` si el motivo tiene menos de 5 caracteres.
+- `409` si la evaluación no está finalizada.
+
+El motivo es obligatorio y queda en la bitácora. Tras la reapertura la
+evaluación vuelve a admitir cambios de configuración y calificaciones; al
+finalizar de nuevo se actualiza el resultado.
+
+Bitácora:
+
+```http
+GET /api/v1/evaluations/5/logs
+```
+
+```json
+[
+  {
+    "id": 12,
+    "action": "reopened",
+    "action_label": "Reapertura",
+    "description": "Evaluación reabierta para revisión.",
+    "reason": "Se recibió nueva evidencia de soporte técnico.",
+    "actor": "Carlos Mendoza",
+    "created_at": "2026-09-30T09:12:00-05:00"
+  }
+]
+```
+
+Acciones registradas: `created`, `configured`, `scored`, `finalized`,
+`reopened`, `updated`. La bitácora es de solo lectura desde el admin.
 
 ### 2.5 Comparación
 
@@ -395,6 +428,7 @@ GET /api/v1/health/
 | Subfactor que no pertenece a la evaluación | `400` |
 | Evaluación finalizada editada | `409` |
 | Reapertura sin motivo | `400` |
+| Reapertura de una evaluación no finalizada | `409` |
 | Comparación con menos de 2 o más de 3 evaluaciones | `400` |
 | Comparación de evaluaciones de necesidades distintas | `400` |
 | Finalizar con subfactores relevantes pendientes | `422` |

@@ -17,11 +17,11 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 | 1 | Catálogo y softwares (RF-01, RF-02, RF-03) | **Completada** |
 | 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | **Completada** |
 | 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | **Completada** |
-| 4 | Historial y trazabilidad (RF-10, RF-11) | Pendiente |
+| 4 | Historial y trazabilidad (RF-10, RF-11) | **Completada** |
 | 5 | Comparación y dashboard (RF-12, RF-13) | Pendiente |
 
-**Próximo paso:** iniciar la Fase 4 — historial de evaluaciones con detalle,
-reapertura con motivo y bitácora simple.
+**Próximo paso:** iniciar la Fase 5 — comparación de 2–3 evaluaciones y
+dashboard con datos reales.
 
 ---
 
@@ -58,6 +58,75 @@ automatización de valores:
 ---
 
 ## Registro de cambios
+
+### 2026-10-30 — Fase 4 completada: historial, reapertura y bitácora
+
+**Qué se hizo**
+
+1. **Backend**:
+   - nuevo modelo `EvaluationLog` (acción, descripción, motivo, responsable y
+     fecha) con migración `0002_evaluationlog`;
+   - `services.log_event` registra creación, configuración, calificación,
+     finalización, actualización y reapertura;
+   - `services.reopen` exige motivo de al menos 5 caracteres y solo admite
+     evaluaciones finalizadas; al reabrir se conserva el último resultado hasta
+     que se vuelva a finalizar;
+   - el listado de evaluaciones incluye `software_version`, `provider_name`,
+     `recommendation` y `recommendation_label`, y acepta filtros por
+     `status`, `software`, `software__provider` y `evaluator`.
+2. **API**:
+   - `GET /evaluations/{id}/logs` devuelve la bitácora;
+   - `POST /evaluations/{id}/reopen` reabre con `reason` obligatorio y `actor`
+     opcional (`400` si el motivo es corto, `409` si no está finalizada).
+3. **Frontend**:
+   - `Historial` conectado a la API: búsqueda por código/software/evaluador,
+     filtros de software, evaluador y estado, fila activa y contador;
+   - panel de detalle con estado, evaluador, organización, fecha, resultado,
+     recomendación, accesos a resultados/calificación y bitácora real;
+   - reapertura con motivo obligatorio, mensajes de éxito/error y limpieza del
+     filtro de estado para no ocultar la evaluación reabierta;
+   - `DataTable` admite fila activa y clic por índice.
+4. **Admin**: bitácora de solo lectura.
+
+**Archivos principales**
+
+- `backend/apps/evaluation/models.py`, `migrations/0002_evaluationlog.py`
+- `backend/apps/evaluation/services.py`
+- `backend/apps/evaluation/serializers.py`
+- `backend/apps/evaluation/views.py`
+- `backend/apps/evaluation/admin.py`
+- `frontend/src/features/history/Historial.tsx`
+- `frontend/src/components/ui/DataTable.tsx`
+- `frontend/src/lib/api.ts`
+- `frontend/src/styles/index.css`
+- `docs/03-arquitectura/arquitectura.md`, `docs/04-api/api.md`
+- `PLAN.md`, `README.md`
+
+**Verificación**
+
+```text
+manage.py check .................. sin issues
+migrate .......................... evaluation.0002 aplicada
+pytest ........................... 61 passed
+ruff check / format .............. All checks passed
+npm run typecheck ................ sin errores
+npm run build .................... ✓ built
+GET /evaluations/ ................ 3 · campos nuevos presentes
+GET /evaluations/1/logs/ ......... 2 entradas (reapertura y finalización)
+POST /evaluations/2/reopen/ ...... 200 · Reabierta · motivo en bitácora
+POST /evaluations/2/finalize/ .... 200 · Finalizada
+GET ?status=finalizada ........... 3
+GET ?search=EV-002 ............... 1
+/historial, /resultados/1, /calificacion/1 → 200
+```
+
+**Pendiente**
+
+- Fase 5: comparación de 2–3 evaluaciones y dashboard con datos reales.
+- Las evaluaciones creadas antes de esta fase no tienen entrada de creación; la
+  bitácora se completa desde la primera acción posterior.
+
+---
 
 ### 2026-10-30 — Fase 3 completada: resultados, gráficos y recomendación
 
