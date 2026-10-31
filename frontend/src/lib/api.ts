@@ -86,6 +86,168 @@ export type SoftwareInput = {
   website?: string
 }
 
+export type EvaluationStatus =
+  | "borrador"
+  | "en_evaluacion"
+  | "finalizada"
+  | "reabierta"
+  | "cancelada"
+
+export type EvaluationSummary = {
+  id: number
+  code: string
+  software: number
+  software_label: string
+  evaluator: string
+  organization: string
+  need: string
+  status: EvaluationStatus
+  status_label: string
+  score_5: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type EvaluationSubfactor = {
+  id: number
+  code: string
+  text: string
+  ps: number | null
+  source: string
+  note: string
+  order: number
+}
+
+export type EvaluationFactor = {
+  id: number
+  factor: number
+  code: string
+  name: string
+  dimension_name: string
+  scope: "interno" | "externo"
+  ns: number
+  tc: number
+  ie: number
+  il: number
+  is_value: number
+  id_value: number
+  ir: number
+  is_relevant: boolean
+  pm: string | null
+  foda: string
+  foda_label: string
+  weight: number
+  order: number
+  subfactors: EvaluationSubfactor[]
+}
+
+export type EvaluationDetail = EvaluationSummary & {
+  factors: EvaluationFactor[]
+}
+
+export type EvaluationInput = {
+  software: number
+  evaluator: string
+  organization?: string
+  need: string
+}
+
+export type ScoreItem = {
+  subfactor: number
+  ps: number | null
+  source?: string
+  note?: string
+}
+
+export type ConfigItem = {
+  factor: number
+  id_value?: number
+  scope?: "interno" | "externo"
+}
+
+export type SwotSummary = {
+  fortalezas: string[]
+  oportunidades: string[]
+  debilidades: string[]
+  amenazas: string[]
+}
+
+export type PreviewFactor = {
+  code: string
+  name: string
+  dimension: string
+  scope: string
+  ie: number
+  il: number
+  is_value: number
+  id_value: number
+  ir: number
+  is_relevant: boolean
+  pm: string | null
+  weight: number
+  foda: string | null
+  foda_label: string
+  pending: boolean
+}
+
+export type EvaluationPreview = {
+  factors: PreviewFactor[]
+  swot: SwotSummary
+  recommendation: {
+    code: "A" | "B" | "C"
+    label: string
+    reasons: string[]
+  }
+  pending: number
+  global: string | null
+  percentage: string | null
+  score_5: string | null
+}
+
+export type ResultFactor = {
+  id: number
+  name: string
+  dimension: string
+  scope: "interno" | "externo"
+  ir: number
+  is_relevant: boolean
+  pm: string | null
+  foda: string
+  foda_label: string
+  weight: number
+}
+
+export type EvaluationResults = {
+  evaluation: {
+    id: number
+    code: string
+    software: string
+    software_version: string
+    evaluator: string
+    organization: string
+    need: string
+    status: EvaluationStatus
+    status_label: string
+    finished_at: string
+  }
+  global: string
+  percentage: string
+  score_5: string
+  recommendation: {
+    code: "A" | "B" | "C"
+    label: string
+    reasons: string[]
+  }
+  swot: SwotSummary
+  counts: {
+    strengths: number
+    opportunities: number
+    weaknesses: number
+    threats: number
+  }
+  factors: ResultFactor[]
+}
+
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api/v1"
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -128,4 +290,37 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  evaluations: () => request<Paginated<EvaluationSummary>>("/evaluations/"),
+  evaluation: (id: number) => request<EvaluationDetail>(`/evaluations/${id}/`),
+  createEvaluation: (data: EvaluationInput) =>
+    request<EvaluationDetail>("/evaluations/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateEvaluation: (id: number, data: Partial<EvaluationInput>) =>
+    request<EvaluationDetail>(`/evaluations/${id}/`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  updateConfig: (id: number, factors: ConfigItem[]) =>
+    request<EvaluationFactor[]>(`/evaluations/${id}/config/`, {
+      method: "PUT",
+      body: JSON.stringify({ factors }),
+    }),
+  updateScores: (id: number, scores: ScoreItem[]) =>
+    request<EvaluationSubfactor[]>(`/evaluations/${id}/scores/`, {
+      method: "PUT",
+      body: JSON.stringify({ scores }),
+    }),
+  previewEvaluation: (id: number) =>
+    request<EvaluationPreview>(`/evaluations/${id}/preview/`, {
+      method: "POST",
+    }),
+  finalizeEvaluation: (id: number) =>
+    request<{ status: string; result: EvaluationPreview }>(
+      `/evaluations/${id}/finalize/`,
+      { method: "POST" },
+    ),
+  evaluationResults: (id: number) =>
+    request<EvaluationResults>(`/evaluations/${id}/results/`),
 }

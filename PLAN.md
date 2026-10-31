@@ -4,7 +4,7 @@ Plan maestro del sistema de evaluación de adopción de software libre (FLOSS).
 
 - **Versión:** 2.0 (alcance ajustado)
 - **Fecha:** 2026-10-29
-- **Estado:** Fase 0 y Fase 1 completadas · Fase 2 pendiente
+- **Estado:** Fases 0, 1 y 2 completadas · Fase 3 pendiente
 - **Bitácora de cambios:** [`MEMORY.md`](./MEMORY.md)
 
 > **Nota de alcance:** proyecto de universidad. Se prioriza la funcionalidad y
@@ -243,6 +243,9 @@ Proyecto_GUIOS_FLOSS/
 
 Estados: `borrador`, `en_evaluacion`, `finalizada`, `reabierta`.
 
+Al crear la evaluación, los factores con alcance `ambos` se resuelven a
+`interno`; el alcance puede cambiarse después desde `/config`.
+
 ### 6.4 Soporte
 
 | Tabla | Campos |
@@ -287,8 +290,8 @@ Convenciones:
 | MK-02 | Softwares | `/softwares` |
 | MK-03 | Criterios | `/criterios` |
 | MK-04 | Nueva evaluación | `/evaluaciones/nueva` |
-| MK-05 | Calificación | `/calificacion` |
-| MK-06 | Resultados | `/resultados` |
+| MK-05 | Calificación | `/calificacion/:id` |
+| MK-06 | Resultados | `/resultados/:id` |
 | MK-07 | Historial | `/historial` |
 | MK-08 | Comparación | `/comparacion` |
 
@@ -305,7 +308,7 @@ solo lectura y permite editar escala y umbral.
 |---|---|---|---|
 | 0 | Infraestructura | Monorepo, Django + DRF + SQLite, frontend migrado, docs | Completada |
 | 1 | RF-01, RF-02, RF-03 | Catálogo 3/18/61, settings, CRUD de software y proveedor, UI | Completada |
-| 2 | RF-04, RF-05, RF-06 | Evaluación, calificación, motor y preview | Pendiente |
+| 2 | RF-04, RF-05, RF-06 | Evaluación, calificación, motor y preview | Completada |
 | 3 | RF-07, RF-08, RF-09 | Resultados, gráficos, FODA y recomendación | Pendiente |
 | 4 | RF-10, RF-11 | Historial, detalle y reapertura | Pendiente |
 | 5 | RF-12, RF-13 | Comparación, dashboard y pulido | Pendiente |

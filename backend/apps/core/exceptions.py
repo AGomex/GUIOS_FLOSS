@@ -1,6 +1,17 @@
 """Manejo uniforme de errores de la API."""
 
+from rest_framework import status as http_status
+from rest_framework.response import Response
 from rest_framework.views import exception_handler as drf_exception_handler
+
+
+def api_error(message, code="invalid", status=http_status.HTTP_400_BAD_REQUEST, detail=None):
+    """Construye una respuesta de error con el sobre estable de la API."""
+
+    return Response(
+        {"error": {"code": code, "message": message, "detail": detail or {}}},
+        status=status,
+    )
 
 
 def _first_message(detail):

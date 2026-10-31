@@ -138,8 +138,8 @@ npm run build
 |---|---|---|
 | 0 | Infraestructura y reorganización | Completada |
 | 1 | Catálogo y softwares (RF-01, RF-02, RF-03) | Completada |
-| 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | Pendiente |
-| 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | Pendiente |
+| 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | Completada |
+| 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | En ejecución |
 | 4 | Historial y trazabilidad (RF-10, RF-11) | Pendiente |
 | 5 | Comparación y dashboard (RF-12, RF-13) | Pendiente |
 

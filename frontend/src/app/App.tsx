@@ -17,7 +17,9 @@ export default function App() {
       <Route path="/criterios" element={<Criterios />} />
       <Route path="/evaluaciones/nueva" element={<NuevaEvaluacion />} />
       <Route path="/calificacion" element={<Calificacion />} />
+      <Route path="/calificacion/:id" element={<Calificacion />} />
       <Route path="/resultados" element={<Resultados />} />
+      <Route path="/resultados/:id" element={<Resultados />} />
       <Route path="/historial" element={<Historial />} />
       <Route path="/comparacion" element={<Comparacion />} />
       <Route path="*" element={<Navigate to="/" replace />} />

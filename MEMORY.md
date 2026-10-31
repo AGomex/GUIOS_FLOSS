@@ -5,7 +5,7 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 
 - **Plan maestro:** [`PLAN.md`](./PLAN.md)
 - **Convenciones:** [`AGENTS.md`](./AGENTS.md)
-- **Última actualización:** 2026-10-29
+- **Última actualización:** 2026-10-30
 
 ---
 
@@ -15,14 +15,13 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 |---|---|---|
 | 0 | Infraestructura y reorganización | **Completada** |
 | 1 | Catálogo y softwares (RF-01, RF-02, RF-03) | **Completada** |
-| 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | Pendiente |
+| 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | **Completada** |
 | 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | Pendiente |
 | 4 | Historial y trazabilidad (RF-10, RF-11) | Pendiente |
 | 5 | Comparación y dashboard (RF-12, RF-13) | Pendiente |
-| 6 | QA y RNF | Pendiente |
 
-**Próximo paso:** iniciar la Fase 2 — modelo de evaluación, calificación de
-subfactores y motor de cálculo con preview en vivo.
+**Próximo paso:** iniciar la Fase 3 — resultados con gráficos, FODA y
+recomendación justificada, e historial básico de evaluaciones.
 
 ---
 
@@ -48,9 +47,10 @@ automatización de valores:
 
 - Backend: **Django 5 + DRF**, Python 3.12.
 - Base de datos: **SQLite** en desarrollo, configuración preparada para PostgreSQL.
-- Cálculo: **GUIOS de la tesis** por defecto, normalizado y configurable por perfiles.
+- Cálculo: **GUIOS de la tesis** por defecto, con escala y umbral configurables.
 - Resultado global: **ponderado por IR**, mostrado en % y escala 1–5.
-- Alcance: **13 RF en 6 fases**.
+- Alcance: **13 RF en 5 fases**.
+- Configuración: un único `ScoringSettings` editable + snapshot por evaluación.
 - Frontend: **React 19 + Vite + TypeScript**, refactor del diseño de Figma.
 - Motor de cálculo: **solo en Python**; el frontend no duplica fórmulas.
 - Sin autenticación en el alcance inicial.
@@ -58,6 +58,86 @@ automatización de valores:
 ---
 
 ## Registro de cambios
+
+### 2026-10-30 — Fase 2 completada: evaluación, cálculo y preview
+
+**Qué se hizo**
+
+1. **Motor de cálculo puro** (`apps/scoring/engine/`): `importance`, `is_relevant`,
+   `factor_mean`, `classify_foda`, `recommend`, `global_score`, `summarize_swot`
+   y `evaluate`; redondeo half-up a dos decimales y errores de negocio propios.
+2. **Pruebas golden** (`apps/scoring/tests/test_engine.py`): 60 casos contra la
+   Tabla 5.3, matriz IS/IR, relevancia, PM, los cuatro cuadrantes FODA, umbral
+   exacto, recomendaciones A/B/C y resultado global mínimo/máximo/ponderado.
+3. **Modelos de evaluación**: `Evaluation` (código `EV-00N`, estados, snapshot),
+   `EvaluationFactor` (copia del factor con ID, IR, PM, FODA y peso),
+   `EvaluationSubfactor` (PS, fuente y observación) y `EvaluationResult`.
+4. **Servicios** (`apps/evaluation/services.py`): creación con snapshot del
+   catálogo y la configuración, configuración de ID/alcance, guardado de
+   calificaciones, preview, finalización y carga de resultados.
+5. **API**: `POST/GET/PATCH /evaluations`, `GET/PUT /evaluations/{id}/config`,
+   `GET/PUT /evaluations/{id}/scores`, `POST /preview`, `POST /finalize`,
+   `GET /results`. Errores con el sobre `{"error": {...}}` vía `api_error`.
+6. **Admin**: evaluación con factores inline, factores con subfactores inline y
+   resultados.
+7. **Frontend**:
+   - `NuevaEvaluacion`: formulario real con softwares activos y creación vía API;
+   - `Calificacion`: factores y subfactores reales agrupados por dimensión,
+     escala configurable, ID y alcance por factor, guardado con autosave y
+     vista previa con global, %, escala 1–5, recomendación y FODA;
+   - `Resultados`: lectura de `/results` con resultado global, recomendación,
+     matriz FODA y detalle de factores;
+   - rutas `/calificacion/:id` y `/resultados/:id`, con fallback a la última
+     evaluación en curso o finalizada;
+   - `Scale` admite mínimo, máximo, deshabilitado y callback.
+
+**Archivos principales**
+
+- `backend/apps/scoring/engine/{core,__init__}.py`
+- `backend/apps/scoring/tests/test_engine.py`
+- `backend/apps/evaluation/{models,services,serializers,views,urls,admin}.py`
+- `backend/apps/evaluation/migrations/0001_initial.py`
+- `backend/apps/core/exceptions.py`
+- `backend/config/api_urls.py`
+- `frontend/src/lib/api.ts`
+- `frontend/src/features/evaluations/NuevaEvaluacion.tsx`
+- `frontend/src/features/scoring/{Calificacion,Scale}.tsx`
+- `frontend/src/features/results/Resultados.tsx`
+- `frontend/src/app/App.tsx`
+- `frontend/src/styles/index.css`
+- `docs/04-api/api.md`, `docs/03-arquitectura/arquitectura.md`
+
+**Verificación**
+
+```text
+makemigrations evaluation ........ evaluation.0001_initial
+migrate .......................... OK
+manage.py check .................. sin issues
+makemigrations --check ........... No changes detected
+pytest ........................... 61 passed (60 motor + health)
+ruff check / format .............. All checks passed
+npm run typecheck ................ sin errores
+npm run build .................... ✓ built in 946 ms
+API crear evaluación ............. 201 · 18 factores copiados
+PUT config ....................... 200 · ID y alcance actualizados
+PUT scores ....................... 200 · 61 subfactores
+POST preview ..................... 200 · global 3.87 · 4.82/5 · C
+POST finalize .................... 200 · estado finalizada
+GET results ...................... 200 · 18 factores · FODA y justificación
+Finalizar incompleta ............. 422 con mensaje en español
+Finalizar con 1 de 61 PS ......... 422 · «Quedan 60 subfactores relevantes sin calificar»
+Results sin finalizar ............ 404 con sobre de error
+Doble finalize ................... 409
+```
+
+**Pendiente**
+
+- Fase 3: gráficos por dimensión/factor, pulido de la pantalla de resultados e
+  historial de evaluaciones.
+- Fase 4: reapertura con motivo y bitácora.
+- Fase 5: comparación de 2–3 evaluaciones y dashboard con datos reales.
+
+---
 
 ### 2026-10-29 — Fase 1 completada: catálogo y softwares
 

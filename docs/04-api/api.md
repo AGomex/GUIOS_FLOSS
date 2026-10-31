@@ -157,17 +157,17 @@ Configuración:
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/evaluations` | Filtros `status`, `software`, `evaluator`, `organization`, `created_at` |
+| `GET` | `/evaluations` | Filtros `status`, `software`, búsqueda por código/evaluador/necesidad |
 | `POST` | `/evaluations` | Crea la evaluación y su snapshot |
-| `GET` | `/evaluations/{id}` | Detalle con configuración |
-| `PATCH` | `/evaluations/{id}` | Solo en estado `borrador` |
-| `GET/PUT` | `/evaluations/{id}/config` | Factores y alcance aplicados |
+| `GET` | `/evaluations/{id}` | Detalle con factores y subfactores aplicados |
+| `PATCH` | `/evaluations/{id}` | Edita datos generales mientras no esté finalizada |
+| `GET/PUT` | `/evaluations/{id}/config` | Importancia del decisor (ID) y alcance por factor |
 | `GET/PUT` | `/evaluations/{id}/scores` | Calificaciones PS por subfactor |
 | `POST` | `/evaluations/{id}/preview` | Calcula sin persistir resultados |
 | `POST` | `/evaluations/{id}/finalize` | Valida y persiste resultados |
-| `POST` | `/evaluations/{id}/reopen` | Reabre con motivo obligatorio |
-| `GET` | `/evaluations/{id}/results` | Resultados, FODA y recomendación |
-| `GET` | `/evaluations/{id}/audit` | Bitácora de cambios |
+| `GET` | `/evaluations/{id}/results` | Resultados, FODA, recomendación y factores |
+| `POST` | `/evaluations/{id}/reopen` | Reabre con motivo (Fase 4) |
+| `GET` | `/evaluations/{id}/audit` | Bitácora de cambios (Fase 4) |
 
 Estados: `borrador`, `en_evaluacion`, `finalizada`, `cancelada`, `reabierta`.
 
@@ -190,12 +190,49 @@ Content-Type: application/json
   "id": 5,
   "code": "EV-005",
   "software": 3,
-  "software_name": "Odoo ERP v17",
+  "software_label": "Odoo ERP v17",
   "evaluator": "Carlos Mendoza",
   "organization": "Dirección Financiera",
   "need": "Gestión contable e inventario",
   "status": "borrador",
-  "created_at": "2026-09-28T10:15:00-05:00"
+  "status_label": "Borrador",
+  "score_5": null,
+  "created_at": "2026-09-28T10:15:00-05:00",
+  "factors": [
+    {
+      "id": 1,
+      "factor": 1,
+      "code": "compatibility",
+      "name": "Compatibilidad",
+      "dimension_name": "Tecnológica",
+      "scope": "externo",
+      "ie": 3,
+      "il": 3,
+      "is_value": 3,
+      "id_value": 3,
+      "ir": 3,
+      "is_relevant": true,
+      "pm": null,
+      "foda": "",
+      "foda_label": "",
+      "weight": 3,
+      "subfactors": [{"id": 1, "code": "compatibility-01", "text": "…", "ps": null}]
+    }
+  ]
+}
+```
+
+Configurar ID y alcance:
+
+```http
+PUT /api/v1/evaluations/5/config
+Content-Type: application/json
+
+{
+  "factors": [
+    {"factor": 1, "id_value": 4, "scope": "interno"},
+    {"factor": 12, "id_value": 2}
+  ]
 }
 ```
 
@@ -226,29 +263,33 @@ POST /api/v1/evaluations/5/preview
   "score_5": "4.00",
   "factors": [
     {
-      "factor": 1,
+      "code": "compatibility",
       "name": "Compatibilidad",
       "dimension": "Tecnológica",
       "scope": "externo",
+      "ie": 3,
+      "il": 3,
       "is_value": 3,
       "id_value": 3,
       "ir": 3,
       "is_relevant": true,
       "pm": "3.63",
-      "weight": "3",
-      "foda": "oportunidad"
+      "weight": 3,
+      "foda": "oportunidad",
+      "foda_label": "Oportunidad",
+      "pending": false
     }
   ],
   "swot": {
-    "strengths": [],
-    "opportunities": ["Compatibilidad"],
-    "weaknesses": ["Soporte"],
-    "threats": []
+    "fortalezas": [],
+    "oportunidades": ["Compatibilidad"],
+    "debilidades": ["Soporte"],
+    "amenazas": []
   },
   "recommendation": {
     "code": "B",
     "label": "Adoptar con reservas",
-    "reasons": ["Soporte es Debilidad con IR = 2"]
+    "reasons": ["Soporte es Debilidad con IR 2."]
   },
   "pending": 0
 }
@@ -260,10 +301,20 @@ Finalizar:
 POST /api/v1/evaluations/5/finalize
 ```
 
-- `422` si quedan subfactores pendientes o no hay factores relevantes.
+- `200` con `{"status": "finalizada", "result": {…}}`.
+- `422` si quedan factores relevantes sin calificar o no hay factores relevantes.
 - `409` si la evaluación ya está finalizada.
 
-Reabrir:
+Resultados:
+
+```http
+GET /api/v1/evaluations/5/results
+```
+
+Devuelve la evaluación, el resultado global, la recomendación, el resumen FODA,
+los conteos y el detalle de los factores con su PM y clasificación.
+
+Reabrir (Fase 4):
 
 ```http
 POST /api/v1/evaluations/5/reopen
@@ -322,13 +373,14 @@ GET /api/v1/health/
 
 | Regla | Respuesta |
 |---|---|
-| `PS` fuera de la escala del perfil | `400` |
-| Subfactor que no pertenece a un factor relevante | `400` |
+| `PS` fuera de la escala configurada | `400` |
+| `ID` fuera de la escala configurada | `400` |
+| Subfactor que no pertenece a la evaluación | `400` |
 | Evaluación finalizada editada | `409` |
 | Reapertura sin motivo | `400` |
 | Comparación con menos de 2 o más de 3 evaluaciones | `400` |
 | Comparación de evaluaciones de necesidades distintas | `400` |
-| Finalizar con subfactores pendientes | `422` |
+| Finalizar con subfactores relevantes pendientes | `422` |
 | Finalizar sin factores relevantes | `422` |
 
 ## 4. Ejemplo de consumo (frontend)

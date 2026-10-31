@@ -30,23 +30,24 @@ Capas:
 | App | Responsabilidad |
 |---|---|
 | `core` | Modelos base, auditoría, errores, paginación |
-| `catalog` | Escalas, dimensiones, factores, subfactores, perfiles |
+| `catalog` | Configuración, dimensiones, factores y subfactores |
 | `software` | Proveedores y softwares |
-| `evaluation` | Evaluaciones, snapshots y calificaciones |
+| `evaluation` | Evaluaciones, snapshots, calificaciones y resultados |
 | `scoring` | Motor de cálculo puro |
-| `results` | PM, FODA, recomendación, reportes |
-| `history` | Bitácora y reapertura |
-| `comparison` | Comparación de alternativas |
-| `dashboard` | Indicadores |
+| `results` | Pantallas y agregados de resultados (Fase 3) |
+| `history` | Bitácora y reapertura (Fase 4) |
+| `comparison` | Comparación de alternativas (Fase 5) |
+| `dashboard` | Indicadores (Fase 5) |
 
 ### Flujo de una evaluación
 
 ```text
-1. POST /evaluations          → crea evaluación + snapshot del catálogo/perfil
-2. PUT  /evaluations/{id}/scores → guarda PS, fuente y observación
-3. POST /evaluations/{id}/preview → calcula PM/FODA sin persistir
-4. POST /evaluations/{id}/finalize → valida, calcula y guarda resultados
-5. GET  /evaluations/{id}/results → devuelve resultados y justificación
+1. POST /evaluations              → crea evaluación + snapshot del catálogo/configuración
+2. PUT  /evaluations/{id}/config  → ajusta ID y alcance por factor
+3. PUT  /evaluations/{id}/scores  → guarda PS, fuente y observación
+4. POST /evaluations/{id}/preview → calcula PM/FODA sin persistir
+5. POST /evaluations/{id}/finalize → valida, calcula y guarda resultados
+6. GET  /evaluations/{id}/results → devuelve resultados y justificación
 ```
 
 ## 3. Motor de cálculo
@@ -60,7 +61,7 @@ Capas:
 
 - Al crear una evaluación se copia el catálogo y la configuración aplicados.
 - `EvaluationFactor` y `EvaluationSubfactor` guardan los valores usados.
-- `EvaluationLog` registra creación, finalización y reapertura (bitácora simple).
+- `EvaluationLog` registrará creación, finalización y reapertura (Fase 4).
 - Editar el catálogo no altera evaluaciones anteriores (RF-11).
 
 ## 5. Configuración
