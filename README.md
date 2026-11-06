@@ -141,7 +141,7 @@ npm run build
 | 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | Completada |
 | 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | Completada |
 | 4 | Historial y trazabilidad (RF-10, RF-11) | Completada |
-| 5 | Comparación y dashboard (RF-12, RF-13) | Pendiente |
+| 5 | Comparación y dashboard (RF-12, RF-13) | Completada |
 
 ---
 

@@ -468,3 +468,26 @@ tbody tr.row--active { background: #eef4fb; box-shadow: inset 3px 0 0 var(--blue
   .filters--history { grid-template-columns: 1fr; }
   .detail-meta { grid-template-columns: 1fr; }
 }
+
+/* ---------------------------------------------------------------------------
+   Comparación y dashboard (Fase 5)
+   --------------------------------------------------------------------------- */
+.comparison-list { display: grid; gap: 8px; max-height: 280px; overflow-y: auto; padding: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.compare-option { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 10px; }
+.compare-option--active { border-color: var(--blue); background: #eef4fb; }
+.compare-option input { accent-color: var(--navy); }
+.compare-option span { display: grid; gap: 2px; min-width: 0; }
+.compare-option small { color: var(--muted); font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compare-option em { color: var(--navy); font-style: normal; font-weight: 700; }
+.comparison-notices { display: grid; gap: 8px; margin-top: 12px; }
+.comparison-notices .notice { margin-top: 0; }
+.bar-chart i.bar--green { background: var(--green); }
+.bar-chart i.bar--amber { background: var(--amber); }
+.bar-chart i.bar--red { background: var(--red); }
+.bar-chart i.bar--neutral { background: #9aa7b6; }
+.comparison-selectors .field--wide { align-self: start; }
+
+@media (max-width: 720px) {
+  .compare-option { grid-template-columns: auto minmax(0, 1fr); }
+  .compare-option em { grid-column: 2; }
+}

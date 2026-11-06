@@ -1,16 +1,26 @@
-export function DashboardBars() {
+export type DashboardBar = {
+  label: string
+  value: number
+  tone?: "blue" | "green" | "amber" | "red" | "neutral"
+}
+
+export function DashboardBars({ bars }: { bars: DashboardBar[] }) {
+  const max = Math.max(1, ...bars.map((bar) => bar.value))
+
   return (
     <div className="bar-chart">
-      <div>
-        <span>En evaluación</span>
-        <i style={{ width: "50%" }} />
-        <strong>2</strong>
-      </div>
-      <div>
-        <span>Finalizadas</span>
-        <i style={{ width: "88%" }} />
-        <strong>4</strong>
-      </div>
+      {bars.map((bar) => (
+        <div key={bar.label}>
+          <span>{bar.label}</span>
+          <i
+            className={bar.tone ? `bar--${bar.tone}` : undefined}
+            style={{
+              width: bar.value ? `${Math.max(4, (bar.value / max) * 100)}%` : "0%",
+            }}
+          />
+          <strong>{bar.value}</strong>
+        </div>
+      ))}
     </div>
   )
 }

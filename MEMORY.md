@@ -5,7 +5,7 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 
 - **Plan maestro:** [`PLAN.md`](./PLAN.md)
 - **Convenciones:** [`AGENTS.md`](./AGENTS.md)
-- **Última actualización:** 2026-10-30
+- **Última actualización:** 2026-11-05
 
 ---
 
@@ -18,10 +18,10 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 | 2 | Evaluación y cálculo (RF-04, RF-05, RF-06) | **Completada** |
 | 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | **Completada** |
 | 4 | Historial y trazabilidad (RF-10, RF-11) | **Completada** |
-| 5 | Comparación y dashboard (RF-12, RF-13) | Pendiente |
+| 5 | Comparación y dashboard (RF-12, RF-13) | **Completada** |
 
-**Próximo paso:** iniciar la Fase 5 — comparación de 2–3 evaluaciones y
-dashboard con datos reales.
+**Próximo paso:** cierre del alcance — revisar datos de demostración y pulir
+detalles de interfaz. No quedan fases pendientes.
 
 ---
 
@@ -58,6 +58,68 @@ automatización de valores:
 ---
 
 ## Registro de cambios
+
+### 2026-11-05 — Fase 5 completada: comparación y dashboard
+
+**Qué se hizo**
+
+1. **Backend**:
+   - `apps/comparison`: `GET /comparisons?ids=1,2,3` y `POST /comparisons`
+     comparan 2–3 evaluaciones con resultados reutilizando `results_payload`;
+     devuelven dimensiones, fortalezas/debilidades, recomendación, `same_need`
+     y `normalized` (escalas distintas);
+   - `apps/dashboard`: `GET /dashboard/summary/` agrega softwares registrados y
+     evaluados, evaluaciones por estado, distribución A/B/C, promedio y
+     evaluaciones recientes;
+   - rutas registradas en `config/api_urls.py`.
+2. **Frontend**:
+   - `Dashboard` con datos reales: métricas, barras por estado, dona de
+     recomendaciones, promedio y tabla de recientes navegable;
+   - `Comparacion` con selección de 2–3 evaluaciones, filtro por necesidad,
+     tabla con el mejor valor por criterio, radar multi-serie, leyenda y avisos
+     cuando las escalas o las necesidades difieren;
+   - `RadarChart` admite varias series; `DashboardBars` y
+     `RecommendationDonut` reciben datos reales;
+   - `api.ts` incorpora los tipos y métodos `comparison` y `dashboardSummary`.
+3. **Documentación**: API, arquitectura, `PLAN.md` y `README.md` alineados con
+   el comportamiento final.
+
+**Archivos principales**
+
+- `backend/apps/comparison/{services,serializers,views,urls}.py`
+- `backend/apps/dashboard/{services,views,urls}.py`
+- `backend/config/api_urls.py`
+- `frontend/src/features/dashboard/Dashboard.tsx`
+- `frontend/src/features/comparison/Comparacion.tsx`
+- `frontend/src/components/charts/{RadarChart,DashboardBars,RecommendationDonut}.tsx`
+- `frontend/src/lib/api.ts`
+- `frontend/src/styles/index.css`
+- `docs/03-arquitectura/arquitectura.md`, `docs/04-api/api.md`
+- `PLAN.md`, `README.md`
+
+**Verificación**
+
+```text
+manage.py check .................. sin issues
+pytest ........................... 61 passed
+ruff check / format .............. All checks passed
+npm run typecheck ................ sin errores
+npm run build .................... ✓ built
+GET /dashboard/summary/ .......... 200 · 4 finalizadas · A=2 C=2 · promedio 4.02
+GET /comparisons/?ids=1,2 ........ 200 · 2 evaluaciones · 3 dimensiones
+POST /comparisons ................ 200
+ids inválidos o cantidad fuera de rango → 400
+/, /comparacion, /historial ...... 200
+```
+
+**Pendiente**
+
+- Los datos locales de demostración comparten software y tienen necesidades
+  distintas; la interfaz lo advierte, pero conviene sembrar alternativas
+  comparables.
+- Sin tests de endpoints por alcance; se mantiene solo el test del motor.
+
+---
 
 ### 2026-10-30 — Fase 4 completada: historial, reapertura y bitácora
 

@@ -281,6 +281,77 @@ export type EvaluationResults = {
   factors: ResultFactor[]
 }
 
+export type ComparisonEvaluation = {
+  id: number
+  code: string
+  software: string
+  software_version: string
+  provider: string
+  evaluator: string
+  organization: string
+  need: string
+  status: EvaluationStatus
+  status_label: string
+  finished_at: string
+  global: string
+  percentage: string
+  score_5: string
+  recommendation: "A" | "B" | "C"
+  recommendation_label: string
+  scale: {
+    min: number
+    max: number
+    foda_threshold: string
+  }
+  dimensions: ResultDimension[]
+  strengths: string[]
+  weaknesses: string[]
+}
+
+export type Comparison = {
+  need: string
+  same_need: boolean
+  normalized: boolean
+  dimensions: string[]
+  evaluations: ComparisonEvaluation[]
+}
+
+export type DashboardRecent = {
+  id: number
+  code: string
+  software: string
+  software_version: string
+  provider: string
+  status: EvaluationStatus
+  status_label: string
+  score_5: string | null
+  recommendation: "A" | "B" | "C" | null
+  recommendation_label: string | null
+  updated_at: string
+}
+
+export type DashboardSummary = {
+  softwares: {
+    total: number
+    evaluated: number
+  }
+  evaluations: {
+    draft: number
+    in_progress: number
+    finished: number
+    reopened: number
+    cancelled: number
+    total: number
+  }
+  recommendations: {
+    A: number
+    B: number
+    C: number
+  }
+  average_score: string | null
+  recent: DashboardRecent[]
+}
+
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api/v1"
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -375,4 +446,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ reason, actor }),
     }),
+  comparison: (ids: number[]) =>
+    request<Comparison>(`/comparisons/?ids=${ids.join(",")}`),
+  dashboardSummary: () =>
+    request<DashboardSummary>("/dashboard/summary/"),
 }

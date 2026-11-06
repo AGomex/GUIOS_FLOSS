@@ -3,8 +3,15 @@ type RadarPoint = {
   value: number
 }
 
+export type RadarSeriesInput = {
+  label: string
+  values: number[]
+}
+
 type RadarChartProps = {
   data?: RadarPoint[]
+  series?: RadarSeriesInput[]
+  labels?: string[]
   max?: number
   comparison?: boolean
   ariaLabel?: string
@@ -78,12 +85,100 @@ function StaticRadar({ comparison }: { comparison: boolean }) {
   )
 }
 
+const SERIES_CLASSES = [
+  "radar-series--one",
+  "radar-series--two",
+  "radar-series--three",
+]
+
+function MultiRadar({
+  labels,
+  series,
+  max,
+  ariaLabel,
+}: {
+  labels: string[]
+  series: RadarSeriesInput[]
+  max: number
+  ariaLabel?: string
+}) {
+  const count = labels.length
+  const safeMax = max > 0 ? max : 1
+
+  return (
+    <div className="radar-chart">
+      <svg
+        aria-label={ariaLabel ?? "Radar comparativo"}
+        role="img"
+        viewBox="0 0 360 210"
+      >
+        <g className="radar-grid">
+          {[0.25, 0.5, 0.75, 1].map((ratio) => (
+            <polygon key={ratio} points={polygon(count, ratio)} />
+          ))}
+          {labels.map((label, index) => {
+            const { x, y } = polar(index, count, 1)
+            return <line key={label} x1={CX} x2={x} y1={CY} y2={y} />
+          })}
+        </g>
+        {series.map((item, seriesIndex) => {
+          const points = item.values
+            .map((value, index) => {
+              const ratio = Math.min(1, Math.max(0, value / safeMax))
+              const { x, y } = polar(index, count, ratio)
+              return `${x.toFixed(1)},${y.toFixed(1)}`
+            })
+            .join(" ")
+          return (
+            <polygon
+              className={`radar-series ${
+                SERIES_CLASSES[seriesIndex] ?? SERIES_CLASSES[0]
+              }`}
+              key={item.label}
+              points={points}
+            />
+          )
+        })}
+        {labels.map((label, index) => {
+          const { x, y } = polar(index, count, 1.3)
+          const anchor = x < CX - 8 ? "end" : x > CX + 8 ? "start" : "middle"
+          return (
+            <text
+              className="radar-label"
+              dominantBaseline="middle"
+              key={label}
+              textAnchor={anchor}
+              x={x}
+              y={y}
+            >
+              {label}
+            </text>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
 export function RadarChart({
   data,
+  series,
+  labels,
   max = 4,
   comparison = false,
   ariaLabel,
 }: RadarChartProps) {
+  if (series && labels && labels.length >= 3) {
+    return (
+      <MultiRadar
+        ariaLabel={ariaLabel}
+        labels={labels}
+        max={max}
+        series={series}
+      />
+    )
+  }
+
   if (!data || data.length < 3) {
     return <StaticRadar comparison={comparison} />
   }

@@ -1,23 +1,41 @@
-export function RecommendationDonut() {
+type RecommendationCounts = {
+  A: number
+  B: number
+  C: number
+}
+
+export function RecommendationDonut({
+  counts,
+}: {
+  counts: RecommendationCounts
+}) {
+  const total = counts.A + counts.B + counts.C
+  const adopt = total ? (counts.A / total) * 100 : 0
+  const reserve = total ? ((counts.A + counts.B) / total) * 100 : 0
+  const background = total
+    ? `conic-gradient(var(--green) 0 ${adopt}%, var(--amber) ${adopt}% ${reserve}%, var(--red) ${reserve}% 100%)`
+    : "conic-gradient(#e6ebf1 0 100%)"
+
   return (
     <div className="donut-wrap">
-      <div className="donut">
+      <div className="donut" style={{ background }}>
         <span>
-          4<small>total</small>
+          {total}
+          <small>total</small>
         </span>
       </div>
       <div className="legend">
         <span>
           <i className="dot dot--green" />
-          Adoptar <strong>1</strong>
+          Adoptar <strong>{counts.A}</strong>
         </span>
         <span>
           <i className="dot dot--amber" />
-          Con reservas <strong>2</strong>
+          Con reservas <strong>{counts.B}</strong>
         </span>
         <span>
           <i className="dot dot--red" />
-          No adoptar <strong>1</strong>
+          No adoptar <strong>{counts.C}</strong>
         </span>
       </div>
     </div>

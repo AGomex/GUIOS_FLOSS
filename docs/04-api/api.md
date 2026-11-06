@@ -379,19 +379,58 @@ Acciones registradas: `created`, `configured`, `scored`, `finalized`,
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/comparisons` | Comparaciones guardadas |
-| `POST` | `/comparisons` | Crea una comparación de 2 a 3 evaluaciones |
-| `GET` | `/comparisons/{id}` | Detalle |
+| `GET` | `/comparisons?ids=1,2,3` | Compara 2 o 3 evaluaciones con resultados |
+| `POST` | `/comparisons` | Igual que `GET`, con los IDs en el cuerpo |
+
+La comparación es calculada al vuelo; no se persiste.
+
+```http
+POST /api/v1/comparisons
+Content-Type: application/json
+
+{"evaluations": [1, 2, 3]}
+```
 
 ```json
 {
-  "need": "Gestión contable e inventario",
-  "evaluations": [5, 6, 7]
+  "need": "Gestión documental",
+  "same_need": false,
+  "normalized": false,
+  "dimensions": ["Tecnológica", "Organizacional", "Económica"],
+  "evaluations": [
+    {
+      "id": 1,
+      "code": "EV-001",
+      "software": "Odoo ERP",
+      "software_version": "17",
+      "provider": "Odoo S.A.",
+      "evaluator": "Ana Torres",
+      "organization": "Dirección",
+      "need": "Gestión documental",
+      "status": "finalizada",
+      "status_label": "Finalizada",
+      "global": "3.87",
+      "percentage": "95.56",
+      "score_5": "4.82",
+      "recommendation": "C",
+      "recommendation_label": "Proporcionar recursos y mejorar",
+      "scale": {"min": 1, "max": 4, "foda_threshold": "3.00"},
+      "dimensions": [
+        {"name": "Tecnológica", "average": "4.00", "percentage": "100.00", "factors": 9}
+      ],
+      "strengths": ["Compatibilidad", "Operabilidad"],
+      "weaknesses": ["Soporte técnico"]
+    }
+  ]
 }
 ```
 
-Las evaluaciones comparadas deben usar la misma configuración; si no, se
-normalizan a porcentaje para la tabla comparativa.
+- `normalized` es `true` cuando las evaluaciones usan escalas distintas; en ese
+  caso conviene comparar los porcentajes.
+- `same_need` es `false` si las evaluaciones corresponden a necesidades
+  distintas; la comparación sigue siendo válida como referencia.
+- Las evaluaciones deben tener resultados (finalizadas o reabiertas con
+  resultado previo).
 
 ### 2.6 Dashboard
 
@@ -402,10 +441,31 @@ normalizan a porcentaje para la tabla comparativa.
 ```json
 {
   "softwares": {"total": 9, "evaluated": 6},
-  "evaluations": {"draft": 1, "in_progress": 2, "finished": 4, "cancelled": 0},
+  "evaluations": {
+    "draft": 1,
+    "in_progress": 2,
+    "finished": 4,
+    "reopened": 0,
+    "cancelled": 0,
+    "total": 7
+  },
   "recommendations": {"A": 1, "B": 2, "C": 1},
   "average_score": "3.68",
-  "recent": []
+  "recent": [
+    {
+      "id": 4,
+      "code": "EV-004",
+      "software": "Odoo ERP",
+      "software_version": "17",
+      "provider": "Odoo S.A.",
+      "status": "finalizada",
+      "status_label": "Finalizada",
+      "score_5": "3.91",
+      "recommendation": "C",
+      "recommendation_label": "Proporcionar recursos y mejorar",
+      "updated_at": "2026-11-05T21:30:00-05:00"
+    }
+  ]
 }
 ```
 
@@ -430,7 +490,7 @@ GET /api/v1/health/
 | Reapertura sin motivo | `400` |
 | Reapertura de una evaluación no finalizada | `409` |
 | Comparación con menos de 2 o más de 3 evaluaciones | `400` |
-| Comparación de evaluaciones de necesidades distintas | `400` |
+| Comparación con una evaluación sin resultados | `400` |
 | Finalizar con subfactores relevantes pendientes | `422` |
 | Finalizar sin factores relevantes | `422` |
 

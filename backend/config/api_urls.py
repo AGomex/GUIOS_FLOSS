@@ -7,4 +7,6 @@ urlpatterns = [
     path("catalog/", include("apps.catalog.urls")),
     path("", include("apps.software.urls")),
     path("", include("apps.evaluation.urls")),
+    path("", include("apps.comparison.urls")),
+    path("", include("apps.dashboard.urls")),
 ]

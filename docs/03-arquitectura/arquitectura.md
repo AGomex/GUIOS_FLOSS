@@ -34,10 +34,10 @@ Capas:
 | `software` | Proveedores y softwares |
 | `evaluation` | Evaluaciones, snapshots, calificaciones y resultados |
 | `scoring` | Motor de cálculo puro |
-| `results` | Pantallas y agregados de resultados (Fase 3) |
-| `history` | Bitácora y reapertura (Fase 4) |
-| `comparison` | Comparación de alternativas (Fase 5) |
-| `dashboard` | Indicadores (Fase 5) |
+| `results` | Reservado; los agregados de resultados viven en `evaluation` |
+| `history` | Reservado; la bitácora vive en `evaluation` |
+| `comparison` | Comparación al vuelo de 2–3 evaluaciones (Fase 5) |
+| `dashboard` | Indicadores agregados (Fase 5) |
 
 ### Flujo de una evaluación
 
@@ -51,6 +51,16 @@ Capas:
 7. POST /evaluations/{id}/reopen  → reabre con motivo obligatorio
 8. GET  /evaluations/{id}/logs    → bitácora de cambios
 ```
+
+### Comparación y dashboard
+
+```text
+GET /comparisons?ids=1,2,3 → compara 2–3 resultados sin persistir
+GET /dashboard/summary/    → agregados de softwares, estados, recomendaciones y recientes
+```
+
+La comparación reutiliza `results_payload` y no duplica fórmulas. El dashboard
+solo agrega datos persistidos; no recalcula PM, FODA ni recomendaciones.
 
 ## 3. Motor de cálculo
 
