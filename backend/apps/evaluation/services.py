@@ -73,14 +73,24 @@ def log_event(
 
 
 @transaction.atomic
-def create_evaluation(*, software, evaluator, organization="", need) -> Evaluation:
+def create_evaluation(
+    *, software, evaluator, organization="", need, literature_run=None
+) -> Evaluation:
     """Crea la evaluación y copia el catálogo vigente como snapshot."""
     settings = settings_payload()
+    literature = {}
+    if literature_run is not None:
+        literature = {
+            search.factor.code: search
+            for search in literature_run.searches.select_related("factor")
+        }
+
     evaluation = Evaluation.objects.create(
         software=software,
         evaluator=evaluator,
         organization=organization,
         need=need,
+        literature_run=literature_run,
     )
 
     factors = (
@@ -93,7 +103,10 @@ def create_evaluation(*, software, evaluator, organization="", need) -> Evaluati
     snapshot_factors = []
     for factor in factors:
         scope = factor.scope if factor.scope in {"interno", "externo"} else "interno"
-        is_value = importance(factor.ie, factor.il)
+        search = literature.get(factor.code)
+        tc = search.tc_after if search else factor.tc
+        il = search.il_after if search else factor.il
+        is_value = importance(factor.ie, il)
         ir = importance(is_value, 3)
         is_relevant = ir >= settings["relevance_min"]
 
@@ -105,9 +118,9 @@ def create_evaluation(*, software, evaluator, organization="", need) -> Evaluati
             dimension_name=factor.dimension.name,
             scope=scope,
             ns=factor.ns,
-            tc=factor.tc,
+            tc=tc,
             ie=factor.ie,
-            il=factor.il,
+            il=il,
             is_value=is_value,
             id_value=3,
             ir=ir,
@@ -134,23 +147,28 @@ def create_evaluation(*, software, evaluator, organization="", need) -> Evaluati
                 "dimension": factor.dimension.name,
                 "scope": scope,
                 "ie": factor.ie,
-                "il": factor.il,
+                "il": il,
                 "is_value": is_value,
-                "tc": factor.tc,
+                "tc": tc,
                 "subfactors": subfactor_texts,
             }
         )
 
+    origin = literature_run.label if literature_run else "Base (tesis)"
     evaluation.config_snapshot = {
         "settings": settings,
         "factors": snapshot_factors,
+        "literature": {
+            "run": literature_run.id if literature_run else None,
+            "label": origin,
+        },
         "captured_at": timezone.now().isoformat(),
     }
     evaluation.save(update_fields=["config_snapshot", "updated_at"])
     log_event(
         evaluation,
         EvaluationLog.Action.CREATED,
-        f"Evaluación creada para {software.name} {software.version}.".strip(),
+        f"Evaluación creada para {software.name} {software.version} · {origin}.",
         actor=evaluator,
     )
     return evaluation
@@ -221,6 +239,77 @@ def apply_config(evaluation: Evaluation, items: list[dict]) -> None:
             f"Configuración actualizada en {len(items)} factores.",
             actor=evaluation.evaluator,
         )
+
+
+@transaction.atomic
+def apply_literature(evaluation: Evaluation, literature_run=None) -> None:
+    """Cambia el juego de valores de literatura de una evaluación abierta."""
+    if evaluation.status == Evaluation.Status.FINISHED:
+        raise EvaluationStateError("La evaluación está finalizada.")
+
+    settings = snapshot_settings(evaluation)
+    base = {
+        factor.code: factor
+        for factor in Factor.objects.filter(
+            code__in=evaluation.factors.values_list("code", flat=True)
+        )
+    }
+    searches = {}
+    if literature_run is not None:
+        searches = {
+            search.factor.code: search
+            for search in literature_run.searches.select_related("factor")
+        }
+
+    updated = []
+    for factor in evaluation.factors.all():
+        search = searches.get(factor.code)
+        origin = base.get(factor.code)
+        if search is None and origin is None:
+            continue
+
+        factor.tc = search.tc_after if search else origin.tc
+        factor.il = search.il_after if search else origin.il
+        factor.is_value = importance(factor.ie, factor.il)
+        factor.ir = importance(factor.is_value, factor.id_value)
+        factor.is_relevant = factor.ir >= settings["relevance_min"]
+        factor.weight = factor.ir if factor.is_relevant else 0
+        factor.save()
+        updated.append(
+            {
+                "code": factor.code,
+                "tc": factor.tc,
+                "il": factor.il,
+                "is_value": factor.is_value,
+            }
+        )
+
+    snapshot = evaluation.config_snapshot or {}
+    factors = snapshot.get("factors", [])
+    by_code = {item["code"]: item for item in factors}
+    for item in updated:
+        entry = by_code.get(item["code"])
+        if entry is not None:
+            entry["tc"] = item["tc"]
+            entry["il"] = item["il"]
+            entry["is_value"] = item["is_value"]
+    snapshot["factors"] = factors
+    snapshot["literature"] = {
+        "run": literature_run.id if literature_run else None,
+        "label": literature_run.label if literature_run else "Base (tesis)",
+    }
+
+    evaluation.literature_run = literature_run
+    evaluation.config_snapshot = snapshot
+    evaluation.save(update_fields=["literature_run", "config_snapshot", "updated_at"])
+
+    label = literature_run.label if literature_run else "Base (tesis)"
+    log_event(
+        evaluation,
+        EvaluationLog.Action.CONFIGURED,
+        f"Juego de literatura cambiado a: {label}.",
+        actor=evaluation.evaluator,
+    )
 
 
 @transaction.atomic
@@ -437,6 +526,9 @@ def results_payload(evaluation: Evaluation) -> dict:
             "status": evaluation.status,
             "status_label": evaluation.get_status_display(),
             "finished_at": evaluation.updated_at,
+            "literature": evaluation.config_snapshot.get(
+                "literature", {"run": None, "label": "Base (tesis)"}
+            ),
         },
         "global": format(result.global_score, "f"),
         "percentage": format(result.percentage, "f"),

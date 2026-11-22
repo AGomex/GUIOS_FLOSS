@@ -491,3 +491,88 @@ tbody tr.row--active { background: #eef4fb; box-shadow: inset 3px 0 0 var(--blue
   .compare-option { grid-template-columns: auto minmax(0, 1fr); }
   .compare-option em { grid-column: 2; }
 }
+
+/* ---------------------------------------------------------------------------
+   Importancia de la literatura con IA
+   --------------------------------------------------------------------------- */
+.literature-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px;
+  border-radius: 999px; background: #eef4fb; color: var(--navy);
+  font-size: 10px; font-weight: 600;
+}
+.literature-form {
+  display: grid; grid-template-columns: minmax(220px, 1.6fr) 110px 110px 150px auto;
+  gap: 12px; align-items: end; margin-top: 16px;
+}
+.literature-form .button { white-space: nowrap; }
+.literature-progress { margin-top: 16px; }
+.literature-progress .progress { margin-top: 0; }
+.literature-hint {
+  display: flex; align-items: center; gap: 6px; margin: 10px 0 0;
+  color: var(--muted); font-size: 10px; line-height: 1.5;
+}
+.literature-summary { margin-top: 16px; }
+.preview-card strong.literature-summary__text {
+  font-size: 15px; line-height: 1.25; overflow-wrap: anywhere;
+}
+.literature-table { margin-top: 16px; }
+.literature-articles-row > td {
+  background: var(--bg); white-space: normal; padding: 12px 14px;
+}
+.literature-articles { display: grid; gap: 8px; }
+.literature-articles__head {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: 8px; color: var(--muted); font-size: 10px; font-weight: 600;
+}
+.literature-articles__head .check-label { font-weight: 500; }
+.literature-article {
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  padding: 10px 12px; display: grid; gap: 4px;
+}
+.literature-article__head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+}
+.literature-article__head a, .literature-article__head strong {
+  color: var(--navy); font-size: 11px; font-weight: 600; line-height: 1.4;
+  text-decoration: none; overflow-wrap: anywhere;
+}
+.literature-article__head a { display: inline-flex; align-items: center; gap: 5px; }
+.literature-article__head a:hover { text-decoration: underline; }
+.literature-article small { color: var(--muted); font-size: 9px; overflow-wrap: anywhere; }
+.literature-article p { margin: 2px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.literature-query {
+  margin: 4px 0 0; color: var(--muted); font-size: 9px; line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.literature-query code { color: var(--navy); }
+.literature-subtitle {
+  margin: 20px 0 8px; font-size: 11px; font-weight: 700; color: var(--navy);
+}
+.literature-history { display: grid; gap: 8px; }
+.literature-history__item {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px; align-items: center; padding: 9px 12px; text-align: left;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  font-size: 11px; transition: background .12s ease, border-color .12s ease;
+}
+.literature-history__item:hover { background: #f8fafc; }
+.literature-history__item--active { border-color: var(--blue); background: #eef4fb; }
+.literature-history__item > small { color: var(--muted); font-size: 9px; white-space: nowrap; }
+.literature-swap {
+  display: grid; grid-template-columns: 320px minmax(0, 1fr);
+  gap: 16px; align-items: start;
+}
+.literature-swap__note { margin: 0; max-width: none; }
+
+@media (max-width: 1024px) {
+  .literature-form { grid-template-columns: minmax(180px, 1fr) 110px 110px 150px; }
+  .literature-form .button { grid-column: 1 / -1; }
+  .literature-swap { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .literature-form { grid-template-columns: 1fr 1fr; }
+  .literature-form .field:first-child { grid-column: 1 / -1; }
+  .literature-history__item { grid-template-columns: minmax(0, 1fr) auto; }
+  .literature-history__item > small { grid-column: 1 / -1; }
+}

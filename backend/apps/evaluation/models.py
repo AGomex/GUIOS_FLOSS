@@ -34,6 +34,14 @@ class Evaluation(TimeStampedModel):
         default=Status.DRAFT,
     )
     config_snapshot = models.JSONField("snapshot de configuración", default=dict)
+    literature_run = models.ForeignKey(
+        "literature.LiteratureRun",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="evaluations",
+        verbose_name="juego de literatura",
+    )
 
     class Meta:
         verbose_name = "evaluación"

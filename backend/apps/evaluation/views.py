@@ -16,6 +16,7 @@ from .serializers import (
     EvaluationListSerializer,
     EvaluationLogSerializer,
     EvaluationSubfactorDetailSerializer,
+    LiteratureSwapSerializer,
     ReopenSerializer,
     ScoresSerializer,
 )
@@ -23,7 +24,7 @@ from .serializers import (
 
 class EvaluationViewSet(viewsets.ModelViewSet):
     queryset = (
-        Evaluation.objects.select_related("software", "result")
+        Evaluation.objects.select_related("software", "result", "literature_run")
         .prefetch_related("factors__subfactors")
         .all()
     )
@@ -143,6 +144,19 @@ class EvaluationViewSet(viewsets.ModelViewSet):
                 reason=serializer.validated_data["reason"],
                 actor=serializer.validated_data.get("actor", ""),
             )
+        except services.EvaluationStateError as exc:
+            return api_error(str(exc), "conflict", 409)
+        except services.EvaluationError as exc:
+            return api_error(str(exc), "invalid", 400)
+        return Response(EvaluationDetailSerializer(evaluation).data)
+
+    @action(detail=True, methods=["post"], url_path="literature")
+    def literature(self, request, pk=None):
+        evaluation = self.get_object()
+        serializer = LiteratureSwapSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            services.apply_literature(evaluation, serializer.validated_data.get("literature_run"))
         except services.EvaluationStateError as exc:
             return api_error(str(exc), "conflict", 409)
         except services.EvaluationError as exc:

@@ -6,13 +6,14 @@ import { Layout } from "@/app/Layout"
 import { Button } from "@/components/ui/Button"
 import { Field } from "@/components/ui/Field"
 import { Section } from "@/components/ui/Section"
-import { api, type Software } from "@/lib/api"
+import { api, type LiteratureRun, type Software } from "@/lib/api"
 
 type EvaluationForm = {
   software: string
   evaluator: string
   organization: string
   need: string
+  literature_run: string
 }
 
 const EMPTY_FORM: EvaluationForm = {
@@ -20,12 +21,14 @@ const EMPTY_FORM: EvaluationForm = {
   evaluator: "",
   organization: "",
   need: "",
+  literature_run: "",
 }
 
 export function NuevaEvaluacion() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [softwares, setSoftwares] = useState<Software[]>([])
+  const [literatureRuns, setLiteratureRuns] = useState<LiteratureRun[]>([])
   const [form, setForm] = useState<EvaluationForm>({
     ...EMPTY_FORM,
     software: searchParams.get("software") ?? "",
@@ -39,8 +42,14 @@ export function NuevaEvaluacion() {
       setLoading(true)
       setError(null)
       try {
-        const page = await api.softwares()
+        const [page, runPage] = await Promise.all([
+          api.softwares(),
+          api.literatureRuns(),
+        ])
         setSoftwares(page.results.filter((item) => item.is_active))
+        setLiteratureRuns(
+          runPage.results.filter((run) => run.status === "completada"),
+        )
       } catch (caught) {
         setError(
           caught instanceof Error
@@ -77,6 +86,7 @@ export function NuevaEvaluacion() {
         evaluator: form.evaluator.trim(),
         organization: form.organization.trim(),
         need: form.need.trim(),
+        literature_run: form.literature_run ? Number(form.literature_run) : null,
       })
       navigate(`/calificacion/${evaluation.id}`)
     } catch (caught) {
@@ -128,6 +138,17 @@ export function NuevaEvaluacion() {
             value={form.organization}
           />
           <Field
+            kind="select"
+            label="Importancia de la literatura"
+            onChange={(value) => setForm({ ...form, literature_run: value })}
+            options={literatureRuns.map((run) => ({
+              value: String(run.id),
+              label: `${run.label} · ${run.totals.relevant} artículos`,
+            }))}
+            placeholder="Base (tesis)"
+            value={form.literature_run}
+          />
+          <Field
             kind="textarea"
             label="Necesidad organizacional"
             onChange={(value) => setForm({ ...form, need: value })}
@@ -136,6 +157,12 @@ export function NuevaEvaluacion() {
             value={form.need}
           />
         </div>
+        <p className="body-copy">
+          <strong>Base (tesis)</strong> usa los TC de la Tabla 5.3. Una corrida IA
+          reemplaza esos TC con los artículos científicos encontrados en Criterios.
+          Puedes cambiar el juego después, durante la calificación, sin perder lo
+          avanzado.
+        </p>
         {!loading && softwares.length === 0 && (
           <p className="annotation">
             No hay softwares activos. Regístralos en la pantalla de Softwares antes

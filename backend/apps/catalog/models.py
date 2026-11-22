@@ -62,6 +62,7 @@ class Factor(TimeStampedModel):
     is_value = models.PositiveSmallIntegerField(
         "importancia sugerida", default=3, validators=IMPORTANCE_VALIDATORS
     )
+    search_chain = models.TextField("cadena de búsqueda", blank=True)
     order = models.PositiveSmallIntegerField("orden", default=0)
     is_active = models.BooleanField("activo", default=True)
 

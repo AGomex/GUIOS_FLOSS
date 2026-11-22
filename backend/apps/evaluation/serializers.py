@@ -2,6 +2,7 @@
 
 from rest_framework import serializers
 
+from apps.literature.models import LiteratureRun
 from apps.software.models import Software
 
 from .models import Evaluation, EvaluationFactor, EvaluationLog, EvaluationSubfactor
@@ -69,6 +70,7 @@ class EvaluationListSerializer(serializers.ModelSerializer):
     score_5 = serializers.SerializerMethodField()
     recommendation = serializers.SerializerMethodField()
     recommendation_label = serializers.SerializerMethodField()
+    literature_run_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Evaluation
@@ -87,9 +89,14 @@ class EvaluationListSerializer(serializers.ModelSerializer):
             "score_5",
             "recommendation",
             "recommendation_label",
+            "literature_run",
+            "literature_run_label",
             "created_at",
             "updated_at",
         ]
+
+    def get_literature_run_label(self, obj):
+        return obj.literature_run.label if obj.literature_run_id else "Base (tesis)"
 
     def get_score_5(self, obj):
         result = getattr(obj, "result", None)
@@ -119,6 +126,12 @@ class EvaluationCreateSerializer(serializers.Serializer):
         max_length=160, required=False, allow_blank=True, default=""
     )
     need = serializers.CharField()
+    literature_run = serializers.PrimaryKeyRelatedField(
+        queryset=LiteratureRun.objects.filter(status=LiteratureRun.Status.COMPLETED),
+        required=False,
+        allow_null=True,
+        default=None,
+    )
 
 
 class ConfigItemSerializer(serializers.Serializer):
@@ -153,3 +166,12 @@ class EvaluationLogSerializer(serializers.ModelSerializer):
 class ReopenSerializer(serializers.Serializer):
     reason = serializers.CharField(min_length=5, max_length=500, trim_whitespace=True)
     actor = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
+
+
+class LiteratureSwapSerializer(serializers.Serializer):
+    literature_run = serializers.PrimaryKeyRelatedField(
+        queryset=LiteratureRun.objects.filter(status=LiteratureRun.Status.COMPLETED),
+        required=False,
+        allow_null=True,
+        default=None,
+    )

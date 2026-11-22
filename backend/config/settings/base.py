@@ -48,6 +48,7 @@ LOCAL_APPS = [
     "apps.history",
     "apps.comparison",
     "apps.dashboard",
+    "apps.literature",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -169,6 +170,24 @@ CORS_ALLOWED_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+
+# ---------------------------------------------------------------------------
+# Literatura con IA
+# ---------------------------------------------------------------------------
+LITERATURE = {
+    "provider": os.getenv("LITERATURE_PROVIDER", "mock"),
+    "prompt_version": os.getenv("LITERATURE_PROMPT_VERSION", "1"),
+    "year_from": int(os.getenv("LITERATURE_YEAR_FROM", "2020")),
+    "year_to": int(os.getenv("LITERATURE_YEAR_TO", "2026")),
+    "max_candidates": int(os.getenv("LITERATURE_MAX_CANDIDATES", "25")),
+    "timeout": float(os.getenv("LITERATURE_TIMEOUT", "90")),
+    "contact_email": os.getenv("LITERATURE_CONTACT_EMAIL", ""),
+    "openai_api_key": os.getenv("OPENAI_API_KEY", ""),
+    "openai_model": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+    "gemini_api_key": os.getenv("GEMINI_API_KEY", ""),
+    "gemini_model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+    "semantic_scholar_key": os.getenv("SEMANTIC_SCHOLAR_API_KEY", ""),
+}
 
 # ---------------------------------------------------------------------------
 # Logging

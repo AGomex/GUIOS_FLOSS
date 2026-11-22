@@ -11,6 +11,7 @@ import {
   type EvaluationDetail,
   type EvaluationFactor,
   type EvaluationPreview,
+  type LiteratureRun,
   type ScoringSettings,
 } from "@/lib/api"
 import { Scale } from "./Scale"
@@ -55,12 +56,16 @@ export function Calificacion() {
   const [scores, setScores] = useState<Record<number, ScoreDraft>>({})
   const [config, setConfig] = useState<Record<number, ConfigDraft>>({})
   const [preview, setPreview] = useState<EvaluationPreview | null>(null)
+  const [literatureRuns, setLiteratureRuns] = useState<LiteratureRun[]>([])
   const [dirty, setDirty] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [finalizing, setFinalizing] = useState(false)
+  const [swapping, setSwapping] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [swapError, setSwapError] = useState<string | null>(null)
+  const [swapMessage, setSwapMessage] = useState<string | null>(null)
 
   const hydrate = useCallback((target: EvaluationDetail) => {
     const scoreDraft: Record<number, ScoreDraft> = {}
@@ -109,12 +114,16 @@ export function Calificacion() {
         }
 
         hydrate(target)
-        const [configuration, result] = await Promise.all([
+        const [configuration, result, runPage] = await Promise.all([
           api.settings(),
           api.previewEvaluation(target.id),
+          api.literatureRuns(),
         ])
         setSettings(configuration)
         setPreview(result)
+        setLiteratureRuns(
+          runPage.results.filter((run) => run.status === "completada"),
+        )
       } catch (caught) {
         setError(
           caught instanceof Error
@@ -255,6 +264,31 @@ export function Calificacion() {
     }
   }
 
+  async function swapLiterature(value: string) {
+    if (!evaluation) return
+    setSwapping(true)
+    setSwapError(null)
+    setSwapMessage(null)
+    try {
+      const updated = await api.swapEvaluationLiterature(
+        evaluation.id,
+        value ? Number(value) : null,
+      )
+      hydrate(updated)
+      const result = await api.previewEvaluation(updated.id)
+      setPreview(result)
+      setSwapMessage(`Juego de literatura aplicado: ${updated.literature_run_label}.`)
+    } catch (caught) {
+      setSwapError(
+        caught instanceof Error
+          ? caught.message
+          : "No se pudo cambiar el juego de literatura.",
+      )
+    } finally {
+      setSwapping(false)
+    }
+  }
+
   async function finish() {
     if (!evaluation) return
     setFinalizing(true)
@@ -342,6 +376,42 @@ export function Calificacion() {
             <span style={{ width: `${progress}%` }} />
           </div>
         </div>
+      </Section>
+
+      <Section title="Importancia de la literatura">
+        <div className="literature-swap">
+          <label className="field">
+            <span>Juego de valores</span>
+            <select
+              disabled={locked || swapping}
+              onChange={(event) => void swapLiterature(event.target.value)}
+              value={evaluation.literature_run ? String(evaluation.literature_run) : ""}
+            >
+              <option value="">Base (tesis)</option>
+              {literatureRuns.map((run) => (
+                <option key={run.id} value={run.id}>
+                  {run.label} · {run.totals.relevant} artículos
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="body-copy literature-swap__note">
+            {evaluation.literature_run
+              ? `Usando la corrida IA «${evaluation.literature_run_label}».`
+              : "Usando los TC de la Tabla 5.3 (tesis)."}{" "}
+            Al cambiar el juego se recalculan IS, IR y el peso de cada factor. Las
+            calificaciones ya registradas se conservan.
+          </p>
+        </div>
+        {swapping && (
+          <div className="form-message">Aplicando juego de literatura…</div>
+        )}
+        {swapError && (
+          <div className="form-message form-message--error">{swapError}</div>
+        )}
+        {swapMessage && (
+          <div className="form-message form-message--ok">{swapMessage}</div>
+        )}
       </Section>
 
       <Section

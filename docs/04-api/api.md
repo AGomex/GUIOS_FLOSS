@@ -137,6 +137,7 @@ Factor:
   "ie": 3,
   "il": 3,
   "is_value": 3,
+  "search_chain": "(…) AND from_publication_date:2020-01-01 to_publication_date:2026-12-31",
   "order": 1,
   "is_active": true
 }
@@ -168,6 +169,7 @@ Configuración:
 | `GET` | `/evaluations/{id}/results` | Resultados, FODA, recomendación y factores |
 | `POST` | `/evaluations/{id}/reopen` | Reabre una evaluación finalizada con motivo obligatorio |
 | `GET` | `/evaluations/{id}/logs` | Bitácora de cambios de la evaluación |
+| `POST` | `/evaluations/{id}/literature` | Cambia el juego de literatura (base o corrida IA) |
 
 Estados: `borrador`, `en_evaluacion`, `finalizada`, `cancelada`, `reabierta`.
 
@@ -181,9 +183,14 @@ Content-Type: application/json
   "software": 3,
   "evaluator": "Carlos Mendoza",
   "organization": "Dirección Financiera",
-  "need": "Gestión contable e inventario"
+  "need": "Gestión contable e inventario",
+  "literature_run": null
 }
 ```
+
+`literature_run` es opcional: `null` usa el juego base de la Tabla 5.3; un ID usa
+una corrida IA **completada**. Se puede cambiar después con
+`POST /evaluations/{id}/literature`.
 
 ```json
 {
@@ -201,6 +208,8 @@ Content-Type: application/json
   "score_5": null,
   "recommendation": null,
   "recommendation_label": null,
+  "literature_run": null,
+  "literature_run_label": "Base (tesis)",
   "created_at": "2026-09-28T10:15:00-05:00",
   "factors": [
     {
@@ -331,6 +340,7 @@ factores con su PM y clasificación.
   "recommendation": {"code": "C", "label": "Proporcionar recursos y mejorar", "reasons": ["…"]},
   "swot": {"fortalezas": ["…"], "oportunidades": ["…"], "debilidades": ["…"], "amenazas": []},
   "counts": {"strengths": 7, "opportunities": 10, "weaknesses": 1, "threats": 0},
+  "literature": {"run": 4, "label": "IA 2020–2026 · 21/11/2026 21:22"},
   "factors": [{"name": "Compatibilidad", "pm": "3.63", "ir": 3, "foda": "oportunidad"}]
 }
 ```
@@ -374,6 +384,20 @@ GET /api/v1/evaluations/5/logs
 
 Acciones registradas: `created`, `configured`, `scored`, `finalized`,
 `reopened`, `updated`. La bitácora es de solo lectura desde el admin.
+
+Cambiar el juego de literatura:
+
+```http
+POST /api/v1/evaluations/5/literature
+Content-Type: application/json
+
+{"literature_run": 4}
+```
+
+- `200` con la evaluación recalculada (`IS`, `IR`, `weight` por factor).
+- `{"literature_run": null}` vuelve al juego base de la tesis.
+- `409` si la evaluación está finalizada.
+- Las calificaciones `PS` ya registradas se conservan; solo cambian `TC` e `IL`.
 
 ### 2.5 Comparación
 
@@ -469,7 +493,132 @@ Content-Type: application/json
 }
 ```
 
-### 2.7 Salud
+### 2.7 Literatura con IA
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/literature/config` | Proveedor vigente, modelo, años, candidatos y proveedores disponibles |
+| `GET` | `/literature/runs` | Corridas registradas (paginado, más recientes primero) |
+| `POST` | `/literature/runs` | Crea y lanza una corrida; responde `202` |
+| `GET` | `/literature/runs/{id}` | Detalle con los resultados de los 18 factores |
+| `GET` | `/literature/runs/{id}/factors` | Resultados por factor, sin artículos |
+| `GET` | `/literature/runs/{id}/factors/{code}` | Detalle del factor con sus artículos clasificados |
+
+Configuración:
+
+```json
+{
+  "provider": "mock",
+  "model": "heuristic-v1",
+  "prompt_version": "1",
+  "year_from": 2020,
+  "year_to": 2026,
+  "max_candidates": 25,
+  "providers": [
+    {"value": "openai", "label": "OpenAI", "model": "gpt-4o-mini", "configured": false},
+    {"value": "gemini", "label": "Google Gemini", "model": "gemini-2.0-flash", "configured": false},
+    {"value": "mock", "label": "Heurístico (sin IA)", "model": "heuristic-v1", "configured": true}
+  ]
+}
+```
+
+Lanzar una corrida:
+
+```http
+POST /api/v1/literature/runs
+Content-Type: application/json
+
+{
+  "provider": "openai",
+  "year_from": 2020,
+  "year_to": 2026,
+  "max_candidates": 25,
+  "triggered_by": "Carlos Mendoza"
+}
+```
+
+- `202` con la corrida en estado `pendiente`. La búsqueda se ejecuta en segundo
+  plano para no bloquear la petición.
+- La interfaz consulta `GET /literature/runs/{id}` hasta que el estado sea
+  `completada` o `fallida`.
+- `400` si el proveedor elegido no tiene clave en `.env` o el rango de años es
+  inválido.
+
+Estados: `pendiente`, `ejecutando`, `completada`, `fallida`.
+
+Corrida completada:
+
+```json
+{
+  "id": 4,
+  "status": "completada",
+  "status_label": "Completada",
+  "provider": "mock",
+  "provider_label": "Heurístico (sin IA)",
+  "model": "heuristic-v1",
+  "prompt_version": "1",
+  "year_from": 2020,
+  "year_to": 2026,
+  "max_candidates": 25,
+  "factors_total": 18,
+  "factors_done": 18,
+  "quartiles": {"q1": 3.75, "q2": 9.125, "q3": 12.5},
+  "totals": {"relevant": 383, "before": 243, "after": 383},
+  "searches": [
+    {
+      "factor": 1,
+      "factor_code": "compatibility",
+      "factor_name": "Compatibilidad",
+      "dimension_name": "Tecnológica",
+      "query": "(…) AND from_publication_date:2020-01-01 to_publication_date:2026-12-31",
+      "retrieved": 25,
+      "relevant": 25,
+      "tc_before": 33,
+      "tc_after": 25,
+      "il_before": 3,
+      "il_after": 1,
+      "status": "completada",
+      "status_label": "Completada",
+      "error": ""
+    }
+  ]
+}
+```
+
+`tc_after` es el TC de la corrida: reemplaza al de la tesis, no se suma.
+`il_after` sale de los cuartiles de `tc_after / ns`. `tc_before` e `il_before`
+conservan el juego base para comparar.
+
+Detalle de un factor con artículos:
+
+```json
+{
+  "factor_code": "compatibility",
+  "retrieved": 25,
+  "relevant": 25,
+  "articles": [
+    {
+      "id": 101,
+      "doi": "10.1016/j.example.2024.01.001",
+      "title": "Interoperability in open-source enterprise systems",
+      "year": 2024,
+      "venue": "Journal of Systems and Software",
+      "authors": "Ana Ruiz, Li Wei",
+      "url": "https://doi.org/10.1016/j.example.2024.01.001",
+      "is_relevant": true,
+      "reason": "El resumen aborda compatibilidad e interoperabilidad en un contexto de adopción.",
+      "confidence": 0.92,
+      "order": 0
+    }
+  ]
+}
+```
+
+El clasificador solo etiqueta artículos recuperados de las fuentes; no genera
+citas. `confidence` es una estimación del modelo y `reason` explica la decisión
+en español.
+
+### 2.8 Salud
 
 ```http
 GET /api/v1/health/
@@ -491,6 +640,8 @@ GET /api/v1/health/
 | Reapertura de una evaluación no finalizada | `409` |
 | Comparación con menos de 2 o más de 3 evaluaciones | `400` |
 | Comparación con una evaluación sin resultados | `400` |
+| Corrida de literatura con proveedor sin clave o años inválidos | `400` |
+| Cambiar la literatura de una evaluación finalizada | `409` |
 | Finalizar con subfactores relevantes pendientes | `422` |
 | Finalizar sin factores relevantes | `422` |
 

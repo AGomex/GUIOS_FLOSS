@@ -108,6 +108,8 @@ export type EvaluationSummary = {
   score_5: string | null
   recommendation: "A" | "B" | "C" | null
   recommendation_label: string | null
+  literature_run: number | null
+  literature_run_label: string
   created_at: string
   updated_at: string
 }
@@ -170,6 +172,7 @@ export type EvaluationInput = {
   evaluator: string
   organization?: string
   need: string
+  literature_run?: number | null
 }
 
 export type ScoreItem = {
@@ -256,6 +259,10 @@ export type EvaluationResults = {
     status: EvaluationStatus
     status_label: string
     finished_at: string
+    literature: {
+      run: number | null
+      label: string
+    }
   }
   global: string
   percentage: string
@@ -350,6 +357,98 @@ export type DashboardSummary = {
   }
   average_score: string | null
   recent: DashboardRecent[]
+}
+
+export type LiteratureProvider = "openai" | "gemini" | "mock"
+
+export type LiteratureProviderOption = {
+  value: LiteratureProvider
+  label: string
+  model: string
+  configured: boolean
+}
+
+export type LiteratureConfig = {
+  provider: LiteratureProvider
+  model: string
+  prompt_version: string
+  year_from: number
+  year_to: number
+  max_candidates: number
+  providers: LiteratureProviderOption[]
+}
+
+export type LiteratureRunStatus =
+  | "pendiente"
+  | "ejecutando"
+  | "completada"
+  | "fallida"
+
+export type LiteratureRun = {
+  id: number
+  status: LiteratureRunStatus
+  status_label: string
+  provider: LiteratureProvider
+  provider_label: string
+  model: string
+  prompt_version: string
+  year_from: number
+  year_to: number
+  max_candidates: number
+  factors_total: number
+  factors_done: number
+  quartiles: { q1?: number; q2?: number; q3?: number }
+  error: string
+  triggered_by: string
+  started_at: string | null
+  finished_at: string | null
+  created_at: string
+  label: string
+  totals: {
+    relevant: number
+    before: number
+    after: number
+  }
+}
+
+export type LiteratureSearch = {
+  id: number
+  factor: number
+  factor_code: string
+  factor_name: string
+  dimension_name: string
+  query: string
+  retrieved: number
+  relevant: number
+  tc_before: number
+  tc_after: number
+  il_before: number
+  il_after: number
+  status: LiteratureRunStatus
+  status_label: string
+  error: string
+}
+
+export type LiteratureArticle = {
+  id: number
+  doi: string
+  title: string
+  year: number | null
+  venue: string
+  authors: string
+  url: string
+  is_relevant: boolean
+  reason: string
+  confidence: number
+  order: number
+}
+
+export type LiteratureRunDetail = LiteratureRun & {
+  searches: LiteratureSearch[]
+}
+
+export type LiteratureSearchDetail = LiteratureSearch & {
+  articles: LiteratureArticle[]
 }
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api/v1"
@@ -450,4 +549,28 @@ export const api = {
     request<Comparison>(`/comparisons/?ids=${ids.join(",")}`),
   dashboardSummary: () =>
     request<DashboardSummary>("/dashboard/summary/"),
+  literatureConfig: () => request<LiteratureConfig>("/literature/config/"),
+  literatureRuns: () => request<Paginated<LiteratureRun>>("/literature/runs/"),
+  literatureRun: (id: number) =>
+    request<LiteratureRunDetail>(`/literature/runs/${id}/`),
+  createLiteratureRun: (data: {
+    provider?: LiteratureProvider
+    year_from?: number
+    year_to?: number
+    max_candidates?: number
+    triggered_by?: string
+  }) =>
+    request<LiteratureRunDetail>("/literature/runs/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  literatureFactor: (runId: number, code: string) =>
+    request<LiteratureSearchDetail>(
+      `/literature/runs/${runId}/factors/${code}/`,
+    ),
+  swapEvaluationLiterature: (id: number, literatureRun: number | null) =>
+    request<EvaluationDetail>(`/evaluations/${id}/literature/`, {
+      method: "POST",
+      body: JSON.stringify({ literature_run: literatureRun }),
+    }),
 }

@@ -38,6 +38,7 @@ Capas:
 | `history` | Reservado; la bitácora vive en `evaluation` |
 | `comparison` | Comparación al vuelo de 2–3 evaluaciones (Fase 5) |
 | `dashboard` | Indicadores agregados (Fase 5) |
+| `literature` | Búsqueda de artículos, clasificación IA y juego de valores IL |
 
 ### Flujo de una evaluación
 
@@ -61,6 +62,35 @@ GET /dashboard/summary/    → agregados de softwares, estados, recomendaciones 
 
 La comparación reutiliza `results_payload` y no duplica fórmulas. El dashboard
 solo agrega datos persistidos; no recalcula PM, FODA ni recomendaciones.
+
+### Literatura con IA
+
+```text
+POST /literature/runs            → crea la corrida y la ejecuta en un hilo aparte
+GET  /literature/runs/{id}       → estado, progreso y 18 resultados por factor
+GET  /literature/runs/{id}/factors/{code} → artículos y motivo de clasificación
+POST /evaluations/{id}/literature → aplica el juego base o una corrida completada
+```
+
+Componentes:
+
+| Módulo | Responsabilidad |
+|---|---|
+| `keywords.py` | Términos de adopción y por factor; cadena de búsqueda documentada |
+| `sources.py` | OpenAlex → Crossref → Semantic Scholar con `httpx` |
+| `providers/` | Clasificadores OpenAI, Gemini y heurístico (`mock`) |
+| `quartiles.py` | Cortes y asignación de IL por `TC / NS` |
+| `services.py` | Orquestación, caché de veredictos y persistencia |
+
+La corrida se ejecuta en un hilo para no bloquear la petición; la UI consulta el
+estado cada pocos segundos. La clasificación es determinista (`temperature = 0`)
+y reutiliza veredictos previos con el mismo modelo y `prompt_version`, de modo
+que repetir una corrida con las mismas fuentes produce el mismo conteo.
+
+El juego base de la Tabla 5.3 nunca se modifica: cada corrida vive en
+`LiteratureRun`, `FactorSearch` y `Article`, y la evaluación guarda el `run`
+elegido (`null` = base). Cambiar de juego recalcula `IS`, `IR` y peso, pero no
+toca las calificaciones `PS`.
 
 ## 3. Motor de cálculo
 
@@ -95,7 +125,22 @@ Cada evaluación guarda un snapshot JSON con el catálogo y la configuración us
 | Desarrollo | `config.settings.dev` | SQLite | Sí |
 
 `config.settings.prod` se conserva como plantilla mínima, pero no se despliega.
-Variables en `.env` (ver `.env.example`).
+Variables en `.env` (ver `.env.example`), ubicado en la raíz del repositorio.
+
+Literatura con IA:
+
+| Variable | Efecto |
+|---|---|
+| `LITERATURE_PROVIDER` | `openai`, `gemini` o `mock` por defecto |
+| `LITERATURE_YEAR_FROM` / `_TO` | Rango de años (2020–2026) |
+| `LITERATURE_MAX_CANDIDATES` | Candidatos por factor (25) |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | Clave y modelo de OpenAI |
+| `GEMINI_API_KEY` / `GEMINI_MODEL` | Clave y modelo de Gemini |
+| `SEMANTIC_SCHOLAR_API_KEY` | Clave opcional para la tercera fuente |
+| `LITERATURE_CONTACT_EMAIL` | Correo de cortesía para OpenAlex/Crossref |
+
+Sin claves, el sistema funciona con `mock`: recupera artículos reales y decide la
+pertinencia con una heurística determinista.
 
 ## 7. Seguridad
 
@@ -110,6 +155,10 @@ Variables en `.env` (ver `.env.example`).
 - Una carpeta por feature; componentes de UI reutilizables.
 - Estilos globales en `src/styles/index.css` con tokens de la identidad visual.
 - Sin lógica de negocio: solo presentación y llamadas a la API.
+- `Criterios` incluye el panel de literatura con IA: configuración, lanzamiento,
+  progreso, tabla de los 18 factores, artículos y historial de corridas.
+- `NuevaEvaluacion` y `Calificacion` permiten elegir **Base (tesis)** o una
+  corrida IA; la calificación puede alternar sin perder avances.
 
 ## 9. Pruebas
 

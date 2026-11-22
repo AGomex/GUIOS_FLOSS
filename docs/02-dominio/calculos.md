@@ -143,21 +143,69 @@ Recomendación: existe una Debilidad con `IR = 2` → **B**.
 r_i = c_i / n_i
 ```
 
-donde `c_i` son las citas del factor y `n_i` su número de subfactores. Luego se asigna un cuartil:
+donde `c_i` son las citas del factor y `n_i` su número de subfactores. Los cortes
+se calculan con percentiles de interpolación lineal (el mismo criterio con el que
+se verificó la Tabla 5.3) y luego se asigna un cuartil:
 
 ```text
 IL(r_i) = 1 si r_i <= rq1
           2 si rq1 < r_i <= rq2
           3 si rq2 < r_i <= rq3
-          4 si rq3 < r_i <= rq4
+          4 si rq3 < r_i
 ```
 
-**Nota importante:** los valores de IL publicados en la Tabla 5.3 no se reproducen exactamente con cuartiles estándar sobre los 18 valores de `r_i` (por ejemplo, Documentación tiene `r = 1.82` y `IL = 1`). Por eso:
+Con los 18 valores de la Tabla 5.3 los cortes son `rq1 = 1.8636`,
+`rq2 = 3.65` y `rq3 = 4.78125`, y la regla reproduce **18/18** los valores
+publicados. El test `backend/apps/literature/tests/test_quartiles.py` lo
+garantiza.
 
-- El sistema **siembra** los valores publicados en la Tabla 5.3.
-- **No** se recalcula IL: la tesis es la fuente de verdad.
+Aun así, la tesis sigue siendo la fuente de verdad del juego **base**:
+
+- El sistema **siembra** los valores publicados en la Tabla 5.3 y no los
+  sobrescribe.
+- Una corrida de IA guarda su propio juego de `TC` e `IL` en tablas separadas.
 - Si se editara un factor, el cambio afecta solo a las evaluaciones nuevas
   (las anteriores conservan su snapshot).
+
+### 8.1 Actualización con IA
+
+La pantalla **Criterios** permite lanzar una corrida manual que recalcula la
+literatura para los 18 factores:
+
+1. Para cada factor se construye una cadena con términos de adopción de software
+   y términos propios del factor, acotada a los años configurados (2020–2026 por
+   defecto).
+2. Se recuperan artículos reales de OpenAlex, Crossref o Semantic Scholar (hasta
+   `max_candidates`, 25 por defecto).
+3. Un clasificador decide la pertinencia de cada artículo. La cantidad de
+   artículos pertinentes es el **TC de la corrida**.
+4. El TC de la corrida **reemplaza** al TC de la tesis para ese juego: no se suma
+   ni se resta. Por ejemplo, si Compatibilidad tiene `TC = 33` en la tesis y la
+   corrida encuentra 21 artículos pertinentes, el `TC` de la corrida es 21.
+5. Con los 18 cocientes `TC / NS` de la corrida se aplican los cuartiles y se
+   obtiene el `IL` de la corrida.
+
+Reglas de reproducibilidad:
+
+- El prompt tiene versión (`prompt_version`) y los clasificadores usan
+  `temperature = 0`.
+- Un mismo modelo, prompt y conjunto de fuentes produce el mismo conteo. Los
+  veredictos ya calculados se reutilizan como caché por factor y artículo.
+- Los valores solo cambian si aparecen o desaparecen artículos en las fuentes.
+- El clasificador nunca inventa citas: solo marca como pertinentes artículos
+  recuperados realmente.
+
+Proveedores:
+
+| Proveedor | Uso |
+|---|---|
+| `openai` | Clasificación con un modelo de OpenAI (clave en `.env`) |
+| `gemini` | Clasificación con Google Gemini (clave en `.env`) |
+| `mock` | Modo heurístico determinista sin clave; la recuperación de artículos sigue siendo real |
+
+El juego base y cada corrida conviven: al crear o calificar una evaluación se
+elige **Base (tesis)** o una corrida **IA**, y el cambio se puede revertir sin
+perder las calificaciones ya registradas.
 
 ## 9. Datos de referencia
 

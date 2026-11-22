@@ -2,9 +2,9 @@
 
 Plan maestro del sistema de evaluación de adopción de software libre (FLOSS).
 
-- **Versión:** 2.0 (alcance ajustado)
-- **Fecha:** 2026-10-29
-- **Estado:** Fases 0 a 5 completadas
+- **Versión:** 2.1 (actualización de literatura con IA)
+- **Fecha:** 2026-11-21
+- **Estado:** Fases 0 a 5 completadas + actualización de IL con IA
 - **Bitácora de cambios:** [`MEMORY.md`](./MEMORY.md)
 
 > **Nota de alcance:** proyecto de universidad. Se prioriza la funcionalidad y
@@ -73,6 +73,20 @@ responsive, validación en servidor y mensajes claros.
 - Perfiles de importancia versionados (se usa uno solo editable).
 - Endurecimiento de seguridad para producción.
 
+### 3.4 Extensión: actualización de IL con IA
+
+Fuera de los 13 RF originales, se añade una capacidad para recalcular la
+importancia de la literatura (`IL`) de los 18 factores:
+
+- Búsqueda manual (un botón) de artículos científicos 2020–2026 sobre adopción
+  de software y cada factor.
+- Cada artículo pertinente cuenta como `+1 TC` del factor.
+- El `TC` de la corrida **reemplaza** al de la tesis; no se suma.
+- El `IL` se obtiene por cuartiles de `TC / NS`.
+- El juego base de la Tabla 5.3 permanece intacto y es el valor por defecto de
+  cada evaluación; el evaluador puede elegir una corrida IA y revertir.
+- Proveedores: OpenAI, Google Gemini o modo heurístico sin clave (`mock`).
+
 ---
 
 ## 4. Modelo de dominio
@@ -93,9 +107,9 @@ Datos por factor: `NS` (nº de subfactores), `TC` (citas), `IE` (experto),
 | Indicador | Definición | Origen |
 |---|---|---|
 | NS | Número de subfactores | Dato |
-| TC | Total de citas | Tabla 5.3 |
+| TC | Total de citas | Tabla 5.3 o corrida IA |
 | IE | Importancia del experto, 1–4 | Tabla 5.3 |
-| IL | Importancia de la literatura, 1–4 | Tabla 5.3 |
+| IL | Importancia de la literatura, 1–4 | Tabla 5.3 o cuartiles de la corrida IA |
 | IS | Importancia sugerida | `floor((IE + IL) / 2)` |
 | ID | Importancia del decisor, 1–4 | Usuario |
 | IR | Importancia relativa | `floor((IS + ID) / 2)` |
@@ -179,6 +193,23 @@ para que el historial no cambie si se edita el catálogo.
 > La tesis es la fuente de verdad sobre `factors.csv`. Los textos de los 61
 > subfactores provienen de `guiosad_data.csv`.
 
+### 4.5 Juego de literatura con IA
+
+El cálculo base no se toca. Una corrida manual genera un **juego alternativo**:
+
+```text
+TC_IA(i) = nº de artículos pertinentes del factor i (2020–2026)
+r_i      = TC_IA(i) / NS(i)
+IL_IA(i) = cuartil de r_i          (1–4, interpolación lineal)
+```
+
+- El `TC` de la corrida reemplaza al de la tesis para ese juego; no se suma ni se
+  resta (Compatibilidad 33 → 21 significa 21, no 54).
+- Los 18 `IL_IA` salen de los cuartiles de los 18 cocientes.
+- Cada corrida guarda los artículos recuperados, su pertinencia y el motivo.
+- Un mismo modelo, prompt y conjunto de fuentes produce el mismo conteo.
+- El clasificador solo etiqueta artículos reales: no inventa citas.
+
 ---
 
 ## 5. Arquitectura
@@ -198,7 +229,7 @@ frontend/ (React 19 + Vite + TS)  ──HTTP/JSON──►  backend/ (Django 5 +
 ```text
 Proyecto_GUIOS_FLOSS/
 ├─ backend/
-│  ├─ apps/{core,catalog,software,evaluation,scoring,results,history,comparison,dashboard}/
+│  ├─ apps/{core,catalog,software,evaluation,scoring,results,history,comparison,dashboard,literature}/
 │  ├─ config/{settings/{base,dev,prod}.py,urls.py,api_urls.py}
 │  ├─ manage.py
 │  ├─ requirements.txt
@@ -219,7 +250,7 @@ Proyecto_GUIOS_FLOSS/
 | Tabla | Campos |
 |---|---|
 | `Dimension` | code, name, description, order, is_active |
-| `Factor` | dimension, code, name, description, scope, ns, tc, ie, il, is_value, order, is_active |
+| `Factor` | dimension, code, name, description, scope, ns, tc, ie, il, is_value, search_chain, order, is_active |
 | `Subfactor` | factor, code, text, citations, order, is_active |
 | `ScoringSettings` | scale_min, scale_max, foda_threshold, relevance_min |
 
@@ -236,7 +267,7 @@ Proyecto_GUIOS_FLOSS/
 
 | Tabla | Campos |
 |---|---|
-| `Evaluation` | code, software, evaluator, organization, need, status, config_snapshot, dates |
+| `Evaluation` | code, software, evaluator, organization, need, status, config_snapshot, literature_run, dates |
 | `EvaluationFactor` | evaluación, factor, nombre, dimensión, alcance, NS, TC, IE, IL, IS, ID, IR, relevante, PM, FODA, peso |
 | `EvaluationSubfactor` | factor de evaluación, subfactor, texto, PS, fuente, observación |
 | `EvaluationResult` | evaluación, global, porcentaje, escala 1–5, conteos FODA, recomendación, justificación |
@@ -252,6 +283,17 @@ Al crear la evaluación, los factores con alcance `ambos` se resuelven a
 |---|---|
 | `EvaluationLog` | evaluación, actor, acción, detalle, fecha |
 | `Comparison` | necesidad, evaluaciones (2–3), resultado JSON, fecha |
+
+### 6.5 Literatura
+
+| Tabla | Campos |
+|---|---|
+| `LiteratureRun` | estado, proveedor, modelo, prompt_version, años, candidatos, progreso, cuartiles, error, fechas |
+| `FactorSearch` | corrida, factor, cadena de búsqueda, recuperados, pertinentes, TC/IL antes y después, estado |
+| `Article` | búsqueda, DOI, título, año, revista, autores, enlace, pertinencia, motivo, confianza |
+
+Restricción: un `FactorSearch` por corrida y factor. Las corridas son
+inmutables una vez completadas; solo se eliminan desde el admin.
 
 ---
 
@@ -272,6 +314,8 @@ Base: `/api/v1/`
 | Resultados | `GET /evaluations/{id}/results` |
 | Comparación | `GET/POST /comparisons` |
 | Dashboard | `GET /dashboard/summary` |
+| Literatura IA | `GET /literature/config`, `GET/POST /literature/runs`, `GET /literature/runs/{id}`, `GET .../factors/{code}` |
+| Juego de literatura | `POST /evaluations/{id}/literature` |
 | Salud | `GET /health/` |
 
 Convenciones:
@@ -298,7 +342,10 @@ Convenciones:
 Identidad visual: navy `#1F3A5F`, naranja `#F28C28`, Inter, responsive.
 
 El catálogo se administra desde **Django admin**. La pantalla `Criterios` es de
-solo lectura y permite editar escala y umbral.
+solo lectura, permite editar escala y umbral, y contiene el panel de literatura
+con IA (configuración, lanzamiento, progreso, resultados por factor, artículos y
+historial de corridas). `Nueva evaluación` y `Calificación` permiten elegir
+**Base (tesis)** o una corrida IA; el cambio se puede revertir.
 
 ---
 
@@ -312,6 +359,7 @@ solo lectura y permite editar escala y umbral.
 | 3 | RF-07, RF-08, RF-09 | Resultados, gráficos, FODA y recomendación | Completada |
 | 4 | RF-10, RF-11 | Historial, detalle y reapertura | Completada |
 | 5 | RF-12, RF-13 | Comparación, dashboard y pulido | Completada |
+| Ext. | Actualización de IL con IA | Búsqueda, clasificación, cuartiles y selector Base/IA | Completada |
 
 ### Criterios de aceptación
 
@@ -321,6 +369,8 @@ solo lectura y permite editar escala y umbral.
 - **Fase 3:** resultados y FODA reproducibles; recomendación justificada.
 - **Fase 4:** historial con detalle y reapertura con motivo.
 - **Fase 5:** comparación de 2–3 evaluaciones y dashboard con datos reales.
+- **Extensión IA:** corrida de 18 factores con artículos reales, cuartiles
+  reproducibles y selector Base/IA reversible.
 
 ---
 
@@ -356,6 +406,10 @@ solo lectura y permite editar escala y umbral.
 | Fórmulas divergentes | Motor único en Python + golden test |
 | Edición del catálogo altera historial | Snapshot JSON por evaluación |
 | SQLite en concurrencia | Un solo usuario; suficiente para la demo |
+| Conteo IA variable entre corridas | `temperature = 0`, `prompt_version` y caché de veredictos |
+| Fuente académica caída o sin resultados | Cascada OpenAlex → Crossref → Semantic Scholar y error explícito |
+| Clasificación IA errónea | El juego base sigue disponible; el evaluador elige y revierte |
+| Proveedor sin clave | Modo heurístico `mock` con recuperación real de artículos |
 
 ---
 
@@ -374,11 +428,16 @@ solo lectura y permite editar escala y umbral.
 | D-09 | Sin autenticación |
 | D-10 | Sin CI, Docker, E2E, reportes ni auditoría granular |
 | D-11 | Catálogo administrado desde Django admin |
+| D-12 | La IA genera un juego de TC/IL alternativo; el base de la tesis no se modifica |
+| D-13 | Proveedores OpenAI/Gemini configurables; modo heurístico sin clave |
+| D-14 | Un botón manual en Criterios actualiza los 18 factores; el resto de pantallas solo elige el juego |
 
 ---
 
 ## 14. Próximos pasos
 
-1. Fase 1: modelos, seed, API y UI de catálogo/softwares.
-2. Fase 2: motor de cálculo y evaluación.
-3. Fase 3: resultados y recomendación.
+1. Cargar claves reales de OpenAI o Gemini en `.env` y comparar su clasificación
+   con el modo heurístico.
+2. Ajustar los términos de búsqueda por factor si algún conteo queda en cero.
+3. Revisar los datos de demostración y pulir detalles de interfaz.
+4. Mantener actualizados `MEMORY.md` y este plan con cada cambio.

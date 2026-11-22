@@ -5,7 +5,7 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 
 - **Plan maestro:** [`PLAN.md`](./PLAN.md)
 - **Convenciones:** [`AGENTS.md`](./AGENTS.md)
-- **Última actualización:** 2026-11-05
+- **Última actualización:** 2026-11-21
 
 ---
 
@@ -19,9 +19,11 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 | 3 | Resultados y recomendación (RF-07, RF-08, RF-09) | **Completada** |
 | 4 | Historial y trazabilidad (RF-10, RF-11) | **Completada** |
 | 5 | Comparación y dashboard (RF-12, RF-13) | **Completada** |
+| Ext. | Actualización de IL con IA | **Completada** |
 
-**Próximo paso:** cierre del alcance — revisar datos de demostración y pulir
-detalles de interfaz. No quedan fases pendientes.
+**Próximo paso:** probar la clasificación con claves reales de OpenAI o Gemini,
+revisar los conteos por factor y pulir detalles de interfaz. No quedan fases
+pendientes.
 
 ---
 
@@ -54,10 +56,90 @@ automatización de valores:
 - Frontend: **React 19 + Vite + TypeScript**, refactor del diseño de Figma.
 - Motor de cálculo: **solo en Python**; el frontend no duplica fórmulas.
 - Sin autenticación en el alcance inicial.
+- Literatura con IA: **juego alternativo** de TC/IL; la Tabla 5.3 queda como base
+  por defecto y el evaluador puede elegir o revertir.
+- Proveedores IA: **OpenAI, Gemini o heurístico** (`mock`) configurable en `.env`
+  de la raíz; sin clave se usa `mock` con recuperación real de artículos.
+- Una corrida manual actualiza los **18 factores**; el resto de pantallas solo
+  elige el juego.
 
 ---
 
 ## Registro de cambios
+
+### 2026-11-21 — Actualización de la importancia de la literatura con IA
+
+**Qué se hizo**
+
+1. **Backend**:
+   - nueva app `apps/literature` con `LiteratureRun`, `FactorSearch` y
+     `Article`; cada corrida guarda los 18 resultados por factor y los
+     artículos recuperados;
+   - `keywords.py` con términos de adopción y por factor; `sources.py` consulta
+     OpenAlex → Crossref → Semantic Scholar con `httpx`;
+   - `providers/` con clasificadores OpenAI, Gemini y heurístico (`mock`, sin
+     clave); prompt versionado y `temperature = 0`;
+   - `quartiles.py` asigna `IL` por cuartiles de `TC / NS` con interpolación
+     lineal (verificado 18/18 contra la Tabla 5.3);
+   - `services.py` ejecuta la corrida en un hilo, informa progreso y reutiliza
+     veredictos previos como caché;
+   - endpoints `/literature/config/`, `GET|POST /literature/runs/`, detalle,
+     `/factors/` y `/factors/{code}/`;
+   - `Factor.search_chain` + comando `seed_search_chains`;
+   - `Evaluation.literature_run` y `POST /evaluations/{id}/literature`;
+     `create_evaluation` acepta `literature_run` y los resultados incluyen
+     `literature`;
+   - configuración `LITERATURE` en settings, variables en `.env.example` y
+     `httpx` en `requirements.txt`.
+2. **Frontend**:
+   - `LiteraturePanel` dentro de `Criterios`: configuración de proveedor y años,
+     confirmación, sondeo de progreso, tabla de los 18 factores, artículos
+     expandibles con motivo y filtro, y historial de corridas;
+   - selector **Base (tesis) / corrida IA** en `NuevaEvaluacion` y en
+     `Calificacion`, con cambio reversible sin perder calificaciones;
+   - tipos y métodos de literatura en `api.ts`; estilos responsive en
+     `index.css`.
+3. **Documentación**: `calculos.md` (regla de cuartiles y corrida IA), `api.md`
+   (endpoints y ejemplos), `arquitectura.md` (app, flujo y variables),
+   `PLAN.md`, `README.md` y esta bitácora.
+
+**Archivos principales**
+
+- `backend/apps/literature/**` (models, services, keywords, sources, quartiles,
+  providers, views, serializers, admin, tests, migración)
+- `backend/apps/catalog/{models,management/commands/seed_search_chains}.py`
+- `backend/apps/evaluation/{models,serializers,services,views}.py`
+- `backend/config/{settings/base.py,api_urls.py}`
+- `backend/requirements.txt`, `.env.example`
+- `frontend/src/features/criteria/LiteraturePanel.tsx`
+- `frontend/src/features/criteria/Criterios.tsx`
+- `frontend/src/features/evaluations/NuevaEvaluacion.tsx`
+- `frontend/src/features/scoring/Calificacion.tsx`
+- `frontend/src/lib/api.ts`, `frontend/src/styles/index.css`
+- `docs/02-dominio/calculos.md`, `docs/03-arquitectura/arquitectura.md`,
+  `docs/04-api/api.md`, `PLAN.md`, `README.md`
+
+**Verificación**
+
+```text
+ruff check ........................ All checks passed
+pytest ............................ 68 passed
+makemigrations --check ............ No changes detected
+npm run typecheck ................. sin errores
+npm run build ..................... ✓ built
+POST /literature/runs (mock) ...... 202 → completada 18/18
+GET /literature/runs/4/ ........... 200 · 383 pertinentes · q1 3.75 · q2 9.125 · q3 12.5
+POST /evaluations (run 4) ......... 201 · compatibility TC 25 / IL 1
+POST /evaluations/{id}/literature .. 200 · vuelve a base y conserva PS
+```
+
+**Pendiente**
+
+- Probar la clasificación con claves reales de OpenAI o Gemini; hasta ahora solo
+  se validó el modo heurístico con artículos reales de OpenAlex.
+- El modo heurístico es permisivo en algunos factores (varios llegan a 25/25);
+  ajustar términos si se busca un conteo más estricto sin clave.
+- Revisar los datos de demostración y pulir detalles de interfaz.
 
 ### 2026-11-05 — Fase 5 completada: comparación y dashboard
 

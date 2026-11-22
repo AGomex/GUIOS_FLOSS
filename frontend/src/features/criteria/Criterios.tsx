@@ -13,6 +13,7 @@ import {
   type Subfactor,
 } from "@/lib/api"
 import { CriteriaTree } from "./CriteriaTree"
+import { LiteraturePanel } from "./LiteraturePanel"
 
 type SettingsForm = {
   scale_min: string
@@ -143,6 +144,8 @@ export function Criterios() {
         {message && <div className="form-message form-message--ok">{message}</div>}
         {error && <div className="form-message form-message--error">{error}</div>}
       </Section>
+
+      <LiteraturePanel />
 
       <Section
         action={
