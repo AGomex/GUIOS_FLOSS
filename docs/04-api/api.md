@@ -209,7 +209,7 @@ una corrida IA **completada**. Se puede cambiar después con
   "recommendation": null,
   "recommendation_label": null,
   "literature_run": null,
-  "literature_run_label": "Base (tesis)",
+  "literature_run_label": "Base del estudio",
   "created_at": "2026-09-28T10:15:00-05:00",
   "factors": [
     {

@@ -154,7 +154,7 @@ def create_evaluation(
             }
         )
 
-    origin = literature_run.label if literature_run else "Base (tesis)"
+    origin = literature_run.label if literature_run else "Base del estudio"
     evaluation.config_snapshot = {
         "settings": settings,
         "factors": snapshot_factors,
@@ -296,14 +296,14 @@ def apply_literature(evaluation: Evaluation, literature_run=None) -> None:
     snapshot["factors"] = factors
     snapshot["literature"] = {
         "run": literature_run.id if literature_run else None,
-        "label": literature_run.label if literature_run else "Base (tesis)",
+        "label": literature_run.label if literature_run else "Base del estudio",
     }
 
     evaluation.literature_run = literature_run
     evaluation.config_snapshot = snapshot
     evaluation.save(update_fields=["literature_run", "config_snapshot", "updated_at"])
 
-    label = literature_run.label if literature_run else "Base (tesis)"
+    label = literature_run.label if literature_run else "Base del estudio"
     log_event(
         evaluation,
         EvaluationLog.Action.CONFIGURED,
@@ -527,7 +527,7 @@ def results_payload(evaluation: Evaluation) -> dict:
             "status_label": evaluation.get_status_display(),
             "finished_at": evaluation.updated_at,
             "literature": evaluation.config_snapshot.get(
-                "literature", {"run": None, "label": "Base (tesis)"}
+                "literature", {"run": None, "label": "Base del estudio"}
             ),
         },
         "global": format(result.global_score, "f"),

@@ -244,11 +244,12 @@ export function LiteraturePanel() {
       title="Importancia de la literatura con IA"
     >
       <p className="body-copy">
-        Busca artículos científicos sobre adopción de software y cada uno de los 18
-        factores, y cuenta los pertinentes como TC. El TC resultante se convierte en
-        IL por cuartiles de <strong>TC / NS</strong>. La Tabla 5.3 de la tesis queda
-        intacta como juego base: esta corrida solo se usa si la eliges al crear o
-        calificar una evaluación.
+        Analiza la literatura científica reciente para medir qué tan respaldado
+        está cada factor. Recupera artículos de 2020 a 2026, descarta los que no
+        abordan el tema y cuenta los pertinentes: ese total es el TC del factor.
+        Con los 18 valores se calcula el IL por cuartiles de{" "}
+        <strong>TC / NS</strong>. El resultado es un juego de valores alternativo
+        que solo se aplica si lo eliges al crear o calificar una evaluación.
       </p>
 
       <div className="literature-form">

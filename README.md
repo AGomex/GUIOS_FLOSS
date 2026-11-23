@@ -168,7 +168,7 @@ npm run build
 4. Al terminar verás, por factor: recuperados, pertinentes (`TC` IA), `TC` de la
    tesis, `IL` de la tesis y `IL` IA. Al expandir una fila se listan los
    artículos con su motivo de clasificación.
-5. Al crear o calificar una evaluación elige **Base (tesis)** o una corrida IA.
+5. Al crear o calificar una evaluación elige **Base del estudio** o una corrida IA.
    El cambio recalcula `IS`, `IR` y pesos, conserva las calificaciones y puede
    revertirse.
 

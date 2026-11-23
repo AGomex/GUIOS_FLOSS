@@ -145,7 +145,7 @@ export function NuevaEvaluacion() {
               value: String(run.id),
               label: `${run.label} · ${run.totals.relevant} artículos`,
             }))}
-            placeholder="Base (tesis)"
+            placeholder="Base del estudio"
             value={form.literature_run}
           />
           <Field
@@ -158,10 +158,11 @@ export function NuevaEvaluacion() {
           />
         </div>
         <p className="body-copy">
-          <strong>Base (tesis)</strong> usa los TC de la Tabla 5.3. Una corrida IA
-          reemplaza esos TC con los artículos científicos encontrados en Criterios.
-          Puedes cambiar el juego después, durante la calificación, sin perder lo
-          avanzado.
+          <strong>Base del estudio</strong> usa los valores de importancia de la
+          literatura definidos en el estudio original. Una corrida IA los
+          reemplaza con el conteo de artículos científicos encontrados en
+          Criterios. Puedes cambiar el juego después, durante la calificación, sin
+          perder lo avanzado.
         </p>
         {!loading && softwares.length === 0 && (
           <p className="annotation">

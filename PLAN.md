@@ -345,7 +345,7 @@ El catálogo se administra desde **Django admin**. La pantalla `Criterios` es de
 solo lectura, permite editar escala y umbral, y contiene el panel de literatura
 con IA (configuración, lanzamiento, progreso, resultados por factor, artículos y
 historial de corridas). `Nueva evaluación` y `Calificación` permiten elegir
-**Base (tesis)** o una corrida IA; el cambio se puede revertir.
+**Base del estudio** o una corrida IA; el cambio se puede revertir.
 
 ---
 

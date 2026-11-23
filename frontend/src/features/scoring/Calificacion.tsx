@@ -387,7 +387,7 @@ export function Calificacion() {
               onChange={(event) => void swapLiterature(event.target.value)}
               value={evaluation.literature_run ? String(evaluation.literature_run) : ""}
             >
-              <option value="">Base (tesis)</option>
+              <option value="">Base del estudio</option>
               {literatureRuns.map((run) => (
                 <option key={run.id} value={run.id}>
                   {run.label} · {run.totals.relevant} artículos
@@ -398,7 +398,7 @@ export function Calificacion() {
           <p className="body-copy literature-swap__note">
             {evaluation.literature_run
               ? `Usando la corrida IA «${evaluation.literature_run_label}».`
-              : "Usando los TC de la Tabla 5.3 (tesis)."}{" "}
+              : "Usando los valores base de importancia de la literatura."}{" "}
             Al cambiar el juego se recalculan IS, IR y el peso de cada factor. Las
             calificaciones ya registradas se conservan.
           </p>

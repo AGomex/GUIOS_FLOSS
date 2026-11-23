@@ -120,6 +120,7 @@ tbody tr:hover { background: var(--bg); }
 .sum-row:last-child { border-bottom: 0; }
 .page-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 16px; }
 .content > .section + .section { margin-top: 16px; }
+.content > .two-col + .section { margin-top: 16px; }
 
 .evaluation-summary, .result-heading { display: flex; align-items: center; gap: 42px; margin-bottom: 16px; }
 .evaluation-summary > div:nth-child(2) { flex: 1; }
@@ -147,6 +148,8 @@ tbody tr:hover { background: var(--bg); }
 .big-score { font-size: 42px; font-weight: 700; }
 .big-score span { font-size: 16px; color: var(--muted); }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.two-col > .section { display: flex; flex-direction: column; }
+.two-col > .section > .radar-chart { flex: 1; display: grid; place-items: center; }
 .swot { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); }
 .swot div { min-height: 66px; padding: 12px; display: grid; gap: 7px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 10px; }
 .swot div:nth-child(2n) { border-right: 0; }
@@ -165,7 +168,7 @@ tbody tr:hover { background: var(--bg); }
 .log-list small { grid-column: 1 / -1; color: var(--muted); }
 .drawer--detail > .button { width: 100%; margin-top: 10px; }
 
-.comparison-selectors { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+.comparison-selectors { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; align-items: start; }
 .multi-select { min-height: 34px; border: 1px solid var(--border); background: var(--surface); padding: 5px; display: flex; gap: 5px; align-items: center; }
 .multi-select span { border: 1px solid var(--border); background: var(--fill); padding: 4px 7px; font-size: 9px; }
 .notice { border: 1px dashed var(--border); background: var(--fill); padding: 11px 14px; margin-top: 16px; color: var(--muted); font-size: 11px; }
@@ -342,6 +345,15 @@ tbody tr:hover { background: #f8fafc; }
 .series-legend { display: grid; gap: 10px; font-size: 11px; }
 .series-legend span { display: flex; align-items: center; gap: 8px; }
 .notice { border: 1px solid #d4e1ee; background: #edf4fa; color: #3f6485; border-radius: 9px; display: flex; align-items: center; gap: 9px; }
+
+.back-to-top {
+  position: fixed; right: 28px; bottom: 28px; z-index: 20; display: inline-flex; align-items: center;
+  gap: 6px; padding: 9px 14px; border: 1px solid var(--dark); border-radius: 999px;
+  background: var(--dark); color: white; font-size: 11px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 8px 20px rgba(31, 58, 95, .28); transition: background .15s ease, transform .15s ease;
+}
+.back-to-top:hover { background: var(--navy); transform: translateY(-2px); }
+.back-to-top:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ---------------------------------------------------------------------------
    Adaptabilidad (RNF-03)

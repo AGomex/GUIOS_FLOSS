@@ -204,7 +204,7 @@ Proveedores:
 | `mock` | Modo heurístico determinista sin clave; la recuperación de artículos sigue siendo real |
 
 El juego base y cada corrida conviven: al crear o calificar una evaluación se
-elige **Base (tesis)** o una corrida **IA**, y el cambio se puede revertir sin
+elige **Base del estudio** o una corrida **IA**, y el cambio se puede revertir sin
 perder las calificaciones ya registradas.
 
 ## 9. Datos de referencia

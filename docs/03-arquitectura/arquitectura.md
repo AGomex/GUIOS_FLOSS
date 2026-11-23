@@ -157,7 +157,7 @@ pertinencia con una heurística determinista.
 - Sin lógica de negocio: solo presentación y llamadas a la API.
 - `Criterios` incluye el panel de literatura con IA: configuración, lanzamiento,
   progreso, tabla de los 18 factores, artículos y historial de corridas.
-- `NuevaEvaluacion` y `Calificacion` permiten elegir **Base (tesis)** o una
+- `NuevaEvaluacion` y `Calificacion` permiten elegir **Base del estudio** o una
   corrida IA; la calificación puede alternar sin perder avances.
 
 ## 9. Pruebas

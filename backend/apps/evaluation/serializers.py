@@ -96,7 +96,7 @@ class EvaluationListSerializer(serializers.ModelSerializer):
         ]
 
     def get_literature_run_label(self, obj):
-        return obj.literature_run.label if obj.literature_run_id else "Base (tesis)"
+        return obj.literature_run.label if obj.literature_run_id else "Base del estudio"
 
     def get_score_5(self, obj):
         result = getattr(obj, "result", None)

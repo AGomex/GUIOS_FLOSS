@@ -1,4 +1,4 @@
-import { ClipboardList, Plus, RotateCcw, SlidersHorizontal } from "lucide-react"
+import { ArrowUp, ClipboardList, Plus, RotateCcw, SlidersHorizontal } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
@@ -73,6 +73,17 @@ export function Historial() {
   const [reopening, setReopening] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [reopenError, setReopenError] = useState<string | null>(null)
+  const [showTop, setShowTop] = useState(false)
+
+  useEffect(() => {
+    function handleScroll() {
+      setShowTop(window.scrollY > 300)
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -461,6 +472,19 @@ export function Historial() {
           )}
         </aside>
       </div>
+
+      {showTop && (
+        <button
+          aria-label="Volver al inicio"
+          className="back-to-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          title="Volver al inicio"
+          type="button"
+        >
+          <ArrowUp size={16} />
+          <span>Inicio</span>
+        </button>
+      )}
     </Layout>
   )
 }

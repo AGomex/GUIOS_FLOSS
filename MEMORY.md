@@ -5,7 +5,7 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 
 - **Plan maestro:** [`PLAN.md`](./PLAN.md)
 - **Convenciones:** [`AGENTS.md`](./AGENTS.md)
-- **Última actualización:** 2026-11-21
+- **Última actualización:** 2026-11-22
 
 ---
 
@@ -66,6 +66,49 @@ automatización de valores:
 ---
 
 ## Registro de cambios
+
+### 2026-11-22 — Ajustes de textos y presentación
+
+**Qué se hizo**
+
+1. **Textos**: se reemplazó la referencia a la Tabla 5.3 en el panel de
+   literatura por una explicación funcional del proceso (recuperar, filtrar,
+   contar y calcular IL). La opción de valores base pasó de «Base (tesis)» a
+   **«Base del estudio»** en la interfaz, las etiquetas del backend y la
+   documentación.
+2. **Historial**: botón flotante «Inicio» que aparece al bajar y vuelve arriba
+   con desplazamiento suave.
+3. **Comparación**: el selector «Todas» ya no se estira a la altura de la lista
+   de evaluaciones (`align-items: start`).
+4. **Resultados**: separación entre el bloque de dos columnas y la matriz FODA;
+   el radar de dimensiones queda centrado dentro de su tarjeta.
+
+**Archivos afectados**
+
+- `frontend/src/features/criteria/LiteraturePanel.tsx`
+- `frontend/src/features/evaluations/NuevaEvaluacion.tsx`
+- `frontend/src/features/scoring/Calificacion.tsx`
+- `frontend/src/features/history/Historial.tsx`
+- `frontend/src/styles/index.css`
+- `backend/apps/evaluation/serializers.py`, `backend/apps/evaluation/services.py`
+- `docs/02-dominio/calculos.md`, `docs/03-arquitectura/arquitectura.md`,
+  `docs/04-api/api.md`, `PLAN.md`, `README.md`
+
+**Verificación**
+
+```text
+npm run typecheck ................. sin errores
+npm run build ..................... ✓ built
+pytest ............................ 68 passed
+ruff check ........................ All checks passed
+```
+
+**Pendiente**
+
+- Probar visualmente los seis ajustes en el navegador (escritorio, tableta y
+  móvil).
+- Las evaluaciones y bitácoras creadas antes del cambio conservan el texto
+  «Base (tesis)» en sus registros históricos.
 
 ### 2026-11-21 — Actualización de la importancia de la literatura con IA
 
