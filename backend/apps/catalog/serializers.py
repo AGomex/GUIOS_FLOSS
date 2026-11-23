@@ -1,5 +1,7 @@
 """Serializers del catálogo."""
 
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from .models import Dimension, Factor, ScoringSettings, Subfactor
@@ -81,8 +83,18 @@ class ScoringSettingsSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         scale_min = attrs.get("scale_min", self.instance.scale_min)
         scale_max = attrs.get("scale_max", self.instance.scale_max)
-        if scale_min >= scale_max:
-            raise serializers.ValidationError(
-                {"scale_max": "El valor máximo debe ser mayor que el mínimo."}
-            )
+        threshold = Decimal(str(attrs.get("foda_threshold", self.instance.foda_threshold)))
+        relevance_min = attrs.get("relevance_min", self.instance.relevance_min)
+
+        errors = {}
+        if scale_min < 1:
+            errors["scale_min"] = "El valor mínimo debe ser al menos 1."
+        if scale_max <= scale_min:
+            errors["scale_max"] = "El valor máximo debe ser mayor que el mínimo."
+        if relevance_min < 1:
+            errors["relevance_min"] = "La relevancia mínima debe ser al menos 1."
+        if threshold < Decimal(scale_min) or threshold > Decimal(scale_max):
+            errors["foda_threshold"] = f"El umbral FODA debe estar entre {scale_min} y {scale_max}."
+        if errors:
+            raise serializers.ValidationError(errors)
         return attrs

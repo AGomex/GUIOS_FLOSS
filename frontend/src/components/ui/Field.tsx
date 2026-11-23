@@ -12,6 +12,9 @@ type FieldProps = {
   name?: string
   type?: string
   required?: boolean
+  min?: number
+  max?: number
+  step?: string | number
   options?: FieldOption[]
   onChange?: (value: string) => void
 }
@@ -25,6 +28,9 @@ export function Field({
   name,
   type = "text",
   required = false,
+  min,
+  max,
+  step,
   options,
   onChange,
 }: FieldProps) {
@@ -54,7 +60,14 @@ export function Field({
       ) : kind === "textarea" ? (
         <textarea {...common} placeholder={placeholder} rows={3} />
       ) : (
-        <input {...common} placeholder={placeholder} type={type} />
+        <input
+          {...common}
+          max={max}
+          min={min}
+          placeholder={placeholder}
+          step={step}
+          type={type}
+        />
       )}
     </label>
   )

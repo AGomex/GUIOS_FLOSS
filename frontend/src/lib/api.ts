@@ -165,6 +165,8 @@ export type EvaluationFactor = {
 
 export type EvaluationDetail = EvaluationSummary & {
   factors: EvaluationFactor[]
+  scale_min: number
+  scale_max: number
 }
 
 export type EvaluationInput = {

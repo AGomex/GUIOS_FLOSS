@@ -113,10 +113,22 @@ class EvaluationListSerializer(serializers.ModelSerializer):
 
 class EvaluationDetailSerializer(EvaluationListSerializer):
     factors = EvaluationFactorSerializer(many=True, read_only=True)
+    scale_min = serializers.SerializerMethodField()
+    scale_max = serializers.SerializerMethodField()
 
     class Meta(EvaluationListSerializer.Meta):
-        fields = [*EvaluationListSerializer.Meta.fields, "factors"]
+        fields = [*EvaluationListSerializer.Meta.fields, "factors", "scale_min", "scale_max"]
         read_only_fields = ["code", "software", "status", "created_at", "updated_at"]
+
+    @staticmethod
+    def _settings(obj):
+        return obj.config_snapshot.get("settings", {})
+
+    def get_scale_min(self, obj):
+        return self._settings(obj).get("scale_min", 1)
+
+    def get_scale_max(self, obj):
+        return self._settings(obj).get("scale_max", 4)
 
 
 class EvaluationCreateSerializer(serializers.Serializer):
@@ -136,7 +148,7 @@ class EvaluationCreateSerializer(serializers.Serializer):
 
 class ConfigItemSerializer(serializers.Serializer):
     factor = serializers.IntegerField()
-    id_value = serializers.IntegerField(min_value=1, max_value=4, required=False)
+    id_value = serializers.IntegerField(required=False)
     scope = serializers.ChoiceField(choices=["interno", "externo"], required=False)
 
 
@@ -146,7 +158,7 @@ class ConfigSerializer(serializers.Serializer):
 
 class ScoreItemSerializer(serializers.Serializer):
     subfactor = serializers.IntegerField()
-    ps = serializers.IntegerField(min_value=1, max_value=4, required=False, allow_null=True)
+    ps = serializers.IntegerField(required=False, allow_null=True)
     source = serializers.CharField(max_length=120, required=False, allow_blank=True)
     note = serializers.CharField(required=False, allow_blank=True)
 

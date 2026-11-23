@@ -169,6 +169,7 @@ export function Calificacion() {
     const timer = setTimeout(() => {
       setSaving(true)
       persist()
+        .then(() => setError(null))
         .catch((caught) => {
           setError(
             caught instanceof Error
@@ -336,8 +337,8 @@ export function Calificacion() {
     )
   }
 
-  const min = settings?.scale_min ?? 1
-  const max = settings?.scale_max ?? 4
+  const min = evaluation.scale_min ?? settings?.scale_min ?? 1
+  const max = evaluation.scale_max ?? settings?.scale_max ?? 4
 
   return (
     <Layout

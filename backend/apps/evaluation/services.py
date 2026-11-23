@@ -6,7 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.catalog.models import Factor, ScoringSettings
-from apps.scoring.engine import FactorInput, evaluate, importance, round2
+from apps.scoring.engine import FactorInput, evaluate, importance, relevance_importance, round2
 
 from .models import (
     Evaluation,
@@ -224,10 +224,18 @@ def apply_config(evaluation: Evaluation, items: list[dict]) -> None:
             factor.id_value = int(item["id_value"])
 
         if factor.id_value < settings["scale_min"] or factor.id_value > settings["scale_max"]:
-            raise EvaluationError("La importancia del decisor está fuera de la escala.")
+            raise EvaluationError(
+                "La importancia del decisor debe estar entre "
+                f"{settings['scale_min']} y {settings['scale_max']}."
+            )
 
         factor.is_value = importance(factor.ie, factor.il)
-        factor.ir = importance(factor.is_value, factor.id_value)
+        factor.ir = relevance_importance(
+            factor.is_value,
+            factor.id_value,
+            settings["scale_min"],
+            settings["scale_max"],
+        )
         factor.is_relevant = factor.ir >= settings["relevance_min"]
         factor.weight = factor.ir if factor.is_relevant else 0
         factor.save()
@@ -271,7 +279,12 @@ def apply_literature(evaluation: Evaluation, literature_run=None) -> None:
         factor.tc = search.tc_after if search else origin.tc
         factor.il = search.il_after if search else origin.il
         factor.is_value = importance(factor.ie, factor.il)
-        factor.ir = importance(factor.is_value, factor.id_value)
+        factor.ir = relevance_importance(
+            factor.is_value,
+            factor.id_value,
+            settings["scale_min"],
+            settings["scale_max"],
+        )
         factor.is_relevant = factor.ir >= settings["relevance_min"]
         factor.weight = factor.ir if factor.is_relevant else 0
         factor.save()
@@ -336,7 +349,10 @@ def apply_scores(evaluation: Evaluation, items: list[dict]) -> None:
         if ps is not None:
             ps = int(ps)
             if ps < settings["scale_min"] or ps > settings["scale_max"]:
-                raise EvaluationError("La calificación está fuera de la escala.")
+                raise EvaluationError(
+                    "La calificación debe estar entre "
+                    f"{settings['scale_min']} y {settings['scale_max']}."
+                )
 
         subfactor.ps = ps
         subfactor.source = item.get("source", subfactor.source)

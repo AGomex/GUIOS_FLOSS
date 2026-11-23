@@ -74,15 +74,46 @@ export function Criterios() {
   }, [])
 
   async function save() {
+    const minimum = Number(form.scale_min)
+    const maximum = Number(form.scale_max)
+    const threshold = Number(form.foda_threshold)
+    const relevance = Number(form.relevance_min)
+
+    if (!form.scale_min.trim() || !Number.isInteger(minimum) || minimum < 1) {
+      setMessage(null)
+      setError("El valor mínimo debe ser un entero mayor o igual a 1.")
+      return
+    }
+    if (!form.scale_max.trim() || !Number.isInteger(maximum) || maximum <= minimum) {
+      setMessage(null)
+      setError("El valor máximo debe ser un entero mayor que el mínimo.")
+      return
+    }
+    if (!form.relevance_min.trim() || !Number.isInteger(relevance) || relevance < 1) {
+      setMessage(null)
+      setError("La relevancia mínima debe ser un entero mayor o igual a 1.")
+      return
+    }
+    if (
+      !form.foda_threshold.trim() ||
+      !Number.isFinite(threshold) ||
+      threshold < minimum ||
+      threshold > maximum
+    ) {
+      setMessage(null)
+      setError(`El umbral FODA debe estar entre ${minimum} y ${maximum}.`)
+      return
+    }
+
     setSaving(true)
     setError(null)
     setMessage(null)
     try {
       const updated = await api.updateSettings({
-        scale_min: Number(form.scale_min),
-        scale_max: Number(form.scale_max),
+        scale_min: minimum,
+        scale_max: maximum,
         foda_threshold: form.foda_threshold,
-        relevance_min: Number(form.relevance_min),
+        relevance_min: relevance,
       })
       setSettings(updated)
       setMessage("Configuración guardada correctamente.")
@@ -109,25 +140,34 @@ export function Criterios() {
         <div className="inline-fields inline-fields--settings">
           <Field
             label="Valor mínimo"
+            min={1}
             onChange={(value) => setForm({ ...form, scale_min: value })}
+            step={1}
             type="number"
             value={form.scale_min}
           />
           <Field
             label="Valor máximo"
+            min={2}
             onChange={(value) => setForm({ ...form, scale_max: value })}
+            step={1}
             type="number"
             value={form.scale_max}
           />
           <Field
             label="Umbral FODA"
+            max={Number(form.scale_max) || undefined}
+            min={Number(form.scale_min) || undefined}
             onChange={(value) => setForm({ ...form, foda_threshold: value })}
+            step={0.01}
             type="number"
             value={form.foda_threshold}
           />
           <Field
             label="Relevancia mínima (IR)"
+            min={1}
             onChange={(value) => setForm({ ...form, relevance_min: value })}
+            step={1}
             type="number"
             value={form.relevance_min}
           />

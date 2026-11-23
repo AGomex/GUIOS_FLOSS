@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -121,6 +122,23 @@ class ScoringSettings(models.Model):
 
     def __str__(self):
         return f"Escala {self.scale_min}–{self.scale_max} · umbral {self.foda_threshold}"
+
+    def clean(self):
+        """Valida la coherencia de la configuración también desde el admin."""
+        errors = {}
+        if self.scale_min < 1:
+            errors["scale_min"] = "El valor mínimo debe ser al menos 1."
+        if self.scale_max <= self.scale_min:
+            errors["scale_max"] = "El valor máximo debe ser mayor que el mínimo."
+        if self.relevance_min < 1:
+            errors["relevance_min"] = "La relevancia mínima debe ser al menos 1."
+        threshold = Decimal(self.foda_threshold)
+        if threshold < Decimal(self.scale_min) or threshold > Decimal(self.scale_max):
+            errors["foda_threshold"] = (
+                f"El umbral FODA debe estar entre {self.scale_min} y {self.scale_max}."
+            )
+        if errors:
+            raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
         # Fuerza un único registro.

@@ -43,6 +43,19 @@ def importance(first: int, second: int, minimum: int = 1, maximum: int = 4) -> i
     return max(minimum, min(maximum, (first + second) // 2))
 
 
+def relevance_importance(
+    is_value: int, id_value: int, scale_min: int = 1, scale_max: int = 4
+) -> int:
+    """IR con el ID en la escala configurada; el IS se mantiene en 1–4."""
+    if is_value < 1 or is_value > 4:
+        raise CalculationError(f"El valor {is_value} está fuera de la escala 1–4.")
+    if id_value < scale_min or id_value > scale_max:
+        raise CalculationError(
+            f"El valor {id_value} está fuera de la escala {scale_min}–{scale_max}."
+        )
+    return max(scale_min, min(scale_max, (is_value + id_value) // 2))
+
+
 def is_relevant(ir: int, relevance_min: int = 2) -> bool:
     """Un factor es relevante cuando su IR alcanza el mínimo configurado."""
     return ir >= relevance_min
@@ -85,7 +98,12 @@ class FactorInput:
 def calculate_factor(factor: FactorInput, settings: dict) -> dict:
     """Calcula IS, IR, PM y FODA de un factor."""
     is_value = importance(factor.ie, factor.il)
-    ir = importance(is_value, factor.id_value)
+    ir = relevance_importance(
+        is_value,
+        factor.id_value,
+        settings.get("scale_min", 1),
+        settings.get("scale_max", 4),
+    )
     relevant = is_relevant(ir, settings.get("relevance_min", 2))
 
     pm = None

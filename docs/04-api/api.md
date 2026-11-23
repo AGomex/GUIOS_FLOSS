@@ -210,6 +210,8 @@ una corrida IA **completada**. Se puede cambiar después con
   "recommendation_label": null,
   "literature_run": null,
   "literature_run_label": "Base del estudio",
+  "scale_min": 1,
+  "scale_max": 4,
   "created_at": "2026-09-28T10:15:00-05:00",
   "factors": [
     {
@@ -262,6 +264,10 @@ Content-Type: application/json
   ]
 }
 ```
+
+El rango válido de `ps` e `id_value` se toma del **snapshot** de la evaluación,
+no de la configuración global. Si la evaluación se creó con escala 1–5, se acepta
+`5` y se rechaza `6`; si se creó con 1–4, se rechaza `5`.
 
 Previsualización:
 

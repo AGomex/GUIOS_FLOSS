@@ -67,6 +67,59 @@ automatización de valores:
 
 ## Registro de cambios
 
+### 2026-11-22 — Corrección de escalas y validación de criterios
+
+**Qué se hizo**
+
+1. **Backend**:
+   - se eliminó el límite fijo `1–4` de `ps` e `id_value` en los serializers de
+     evaluación; ahora el rango se valida contra el snapshot de cada evaluación;
+   - nueva función `relevance_importance` en el motor: el `ID` usa la escala
+     configurada y el `IR` se acota a ella;
+   - `EvaluationDetailSerializer` expone `scale_min` y `scale_max`;
+   - `ScoringSettingsSerializer` y `ScoringSettings.clean()` validan mínimo,
+     máximo, relevancia y umbral FODA;
+   - migración `catalog/0003_repair_scoring_settings` que corrige valores
+     inválidos; el umbral global pasó de `-1.00` a `3.00`.
+2. **Frontend**:
+   - `Field` admite `min`, `max` y `step`;
+   - `Criterios` valida antes de guardar y muestra mensajes en español;
+   - `Calificacion` usa la escala del snapshot de la evaluación, no la global;
+   - el aviso de error se limpia cuando el autoguardado vuelve a funcionar.
+
+**Archivos afectados**
+
+- `backend/apps/evaluation/{serializers,services}.py`
+- `backend/apps/scoring/engine/{core,__init__}.py`
+- `backend/apps/catalog/{models,serializers}.py`
+- `backend/apps/catalog/migrations/0003_repair_scoring_settings.py`
+- `frontend/src/components/ui/Field.tsx`
+- `frontend/src/features/criteria/Criterios.tsx`
+- `frontend/src/features/scoring/Calificacion.tsx`
+- `frontend/src/lib/api.ts`
+- `docs/02-dominio/calculos.md`, `docs/04-api/api.md`
+
+**Verificación**
+
+```text
+ruff check / format ............... All checks passed
+pytest ............................ 68 passed
+makemigrations --check ............ No changes detected
+npm run typecheck ................. sin errores
+npm run build ..................... ✓ built
+ID=5 en evaluación 1–5 ............ 200 · IR 4
+ps=5 en evaluación 1–5 ............ 200
+ps=6 en evaluación 1–5 ............ 400 «debe estar entre 1 y 5»
+ps=5 en snapshot 1–4 .............. 400 «debe estar entre 1 y 4»
+umbral negativo o fuera de rango .. 400
+```
+
+**Pendiente**
+
+- Revisar visualmente en el navegador que la escala mostrada coincide con la de
+  cada evaluación.
+- Las evaluaciones existentes conservan su snapshot original.
+
 ### 2026-11-22 — Ajustes de textos y presentación
 
 **Qué se hizo**

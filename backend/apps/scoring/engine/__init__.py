@@ -11,6 +11,7 @@ from .core import (
     importance,
     is_relevant,
     recommend,
+    relevance_importance,
     round2,
     summarize_swot,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "importance",
     "is_relevant",
     "recommend",
+    "relevance_importance",
     "round2",
     "summarize_swot",
 ]

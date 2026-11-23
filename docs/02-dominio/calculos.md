@@ -35,6 +35,10 @@ La misma matriz se usa para `IS = f(IE, IL)` y para `IR = f(IS, ID)`.
 
 Equivale a `max(1, floor((a + b) / 2))`. La matriz se verifica con un test contra las 18 filas de la Tabla 5.3 de la tesis.
 
+`IS` se calcula siempre con `IE` e `IL` en 1–4. `ID` sigue la escala configurada
+(`scale_min`–`scale_max`); el `IR` resultante se acota a esa escala. Con la escala
+por defecto 1–4 el resultado es idéntico al de la tesis.
+
 ## 3. Cadena de cálculo
 
 ```text
