@@ -522,7 +522,7 @@ Configuración:
   "max_candidates": 25,
   "providers": [
     {"value": "openai", "label": "OpenAI", "model": "gpt-4o-mini", "configured": false},
-    {"value": "gemini", "label": "Google Gemini", "model": "gemini-2.0-flash", "configured": false},
+    {"value": "gemini", "label": "Google Gemini", "model": "gemini-3.5-flash-lite", "configured": false},
     {"value": "mock", "label": "Heurístico (sin IA)", "model": "heuristic-v1", "configured": true}
   ]
 }

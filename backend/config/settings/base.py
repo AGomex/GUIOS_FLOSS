@@ -185,7 +185,7 @@ LITERATURE = {
     "openai_api_key": os.getenv("OPENAI_API_KEY", ""),
     "openai_model": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
     "gemini_api_key": os.getenv("GEMINI_API_KEY", ""),
-    "gemini_model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+    "gemini_model": os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite"),
     "semantic_scholar_key": os.getenv("SEMANTIC_SCHOLAR_API_KEY", ""),
 }
 

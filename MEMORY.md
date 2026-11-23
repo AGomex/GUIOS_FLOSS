@@ -5,7 +5,7 @@ sesión de trabajo. Debe actualizarse **después de cada cambio relevante**.
 
 - **Plan maestro:** [`PLAN.md`](./PLAN.md)
 - **Convenciones:** [`AGENTS.md`](./AGENTS.md)
-- **Última actualización:** 2026-11-22
+- **Última actualización:** 2026-11-23
 
 ---
 
@@ -66,6 +66,53 @@ automatización de valores:
 ---
 
 ## Registro de cambios
+
+### 2026-11-23 — Corrección del proveedor Gemini
+
+**Qué se hizo**
+
+1. **Diagnóstico**: `gemini-2.0-flash` fue retirado por Google el 1 de junio de
+   2026. El `404` no era un problema de clave: `GET /v1beta/models` respondió
+   `200` y la clave `AQ.` funcionó con los modelos vigentes.
+2. **Modelo por defecto** → `gemini-3.5-flash-lite`, disponible en el nivel
+   gratuito y con respuesta inmediata. `gemini-3.8-flash` también es gratuito,
+   pero devuelve `503` intermitente por alta demanda; se puede activar editando
+   `GEMINI_MODEL` en `.env`.
+3. **`GeminiClassifier`**:
+   - envía la clave en la cabecera `x-goog-api-key` (ya no en la URL);
+   - reintenta ante `429`/`503` y ante tiempo de espera agotado (3 intentos con
+     esperas de 2 s y 5 s);
+   - traduce los errores al español: modelo retirado (`404`), clave inválida,
+     cuota agotada, alta demanda y timeout;
+   - elimina la clave de cualquier mensaje antes de mostrarlo.
+4. `LITERATURE_PROVIDER` sigue en `mock`; Gemini se elige por corrida en la
+   interfaz.
+
+**Archivos afectados**
+
+- `backend/apps/literature/providers/gemini.py`
+- `backend/config/settings/base.py`
+- `.env`, `.env.example`
+- `docs/04-api/api.md`
+- `MEMORY.md`
+
+**Verificación**
+
+```text
+ruff check / format ............... All checks passed
+pytest ............................ 68 passed
+Gemini 3.5 Flash-Lite ............. 503 → reintento → 200
+Clasificación de muestra .......... artículo afín: relevante; artículo ajeno: no relevante
+Modelo retirado (gemini-2.0-flash)  mensaje claro de modelo retirado; clave no filtrada
+Clave inválida .................... «La clave de Gemini no es válida.»
+```
+
+**Pendiente**
+
+- Ejecutar una corrida completa con Gemini desde la interfaz y revisar los
+  conteos por factor.
+- Si se prefiere más calidad que velocidad, cambiar `GEMINI_MODEL` a
+  `gemini-3.8-flash` (también gratuito, con `503` intermitente).
 
 ### 2026-11-22 — Corrección de escalas y validación de criterios
 
