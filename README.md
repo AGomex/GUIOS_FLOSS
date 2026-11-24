@@ -136,6 +136,16 @@ cd backend
 .\.venv\Scripts\ruff.exe check .
 ```
 
+Para preparar datos de demostración (9 evaluaciones finalizadas con Base,
+Heurística y Gemini):
+
+```powershell
+.\.venv\Scripts\python.exe manage.py seed_demo_evaluations --reset
+```
+
+El comando solo elimina las evaluaciones con organización `Demostración GUIOS`
+y necesidad `Evaluación para demostración`.
+
 ### Frontend
 
 ```bash

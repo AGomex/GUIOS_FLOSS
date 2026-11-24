@@ -67,6 +67,55 @@ automatización de valores:
 
 ## Registro de cambios
 
+### 2026-11-23 — Evaluaciones de demostración
+
+**Qué se hizo**
+
+- Nuevo comando `seed_demo_evaluations` que crea **9 evaluaciones finalizadas**
+  (EV-017 a EV-025) para la demostración.
+- Tres softwares con tres juegos de literatura cada uno:
+  - Odoo Community 17: Base, Heurística (392) y Gemini (214), perfil alto → A.
+  - Moodle 4.4: Base, Heurística y Gemini, perfil mixto → B.
+  - SAP S/4HANA 2023: Base, Heurística y Gemini, perfil bajo → C.
+- Mismos PS e ID por software en los tres juegos, para que la única diferencia
+  sea la literatura. Semilla fija `20261123`.
+- 61/61 subfactores calificados, escala 1–4, umbral 3.00 y relevancia 2.
+- Evaluadores ficticios variados (Mateo Robles, Valeria Cedeño, etc.).
+- `--reset` elimina solo las evaluaciones con organización `Demostración GUIOS`
+  y necesidad `Evaluación para demostración`.
+- Documentado en `README.md`.
+
+**Archivos afectados**
+
+- `backend/apps/evaluation/management/commands/seed_demo_evaluations.py`
+- `backend/apps/evaluation/management/__init__.py`
+- `backend/apps/evaluation/management/commands/__init__.py`
+- `README.md`
+- `MEMORY.md`
+
+**Verificación**
+
+```text
+seed_demo_evaluations --reset ..... 9 evaluaciones finalizadas
+EV-017..EV-025 .................... 61/61 subfactores, escala 1–4
+Odoo Community .................... A · global 3.63 / 3.62 / 3.60
+Moodle ............................ B · global 2.81 / 2.79 / 2.79
+SAP S/4HANA ....................... C · global 1.50 / 1.50 / 1.50
+Heurística / Gemini ............... 392 / 214 pertinentes
+Sin --reset ....................... CommandError, no duplica
+API evaluations / results ......... 200 · 9 demo
+API comparisons (3 juegos) ........ 200 · globales 3.63 / 3.62 / 3.60
+API dashboard ..................... 200 · 13 finalizadas
+ruff check / format ............... All checks passed
+pytest ............................ 68 passed
+npm run typecheck ................. sin errores
+npm run build ..................... ✓ built
+```
+
+**Pendiente**
+
+- (ninguno)
+
 ### 2026-11-23 — Proveedores y softwares de prueba
 
 **Qué se hizo**
@@ -106,8 +155,7 @@ npm run build ..................... ✓ built
 
 **Pendiente**
 
-- Crear evaluaciones de prueba con los softwares nuevos usando Gemini y la
-  heurística para comparar resultados.
+- Completado: ver la entrada de evaluaciones de demostración.
 
 ### 2026-11-23 — Visibilidad del juego de literatura
 
