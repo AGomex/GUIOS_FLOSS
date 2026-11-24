@@ -67,6 +67,44 @@ automatización de valores:
 
 ## Registro de cambios
 
+### 2026-11-23 — Visibilidad del juego de literatura
+
+**Qué se hizo**
+
+- La fila de cada factor en Calificación muestra ahora `TC` e `IL` (este último en
+  negrita), además de NS, IS, IR y peso.
+- Al cambiar de juego se informa cuántos factores cambiaron: «8 factores
+  cambiaron IL y 4 cambiaron IS/IR», y si el global varió o se mantuvo.
+- El nombre de la corrida incluye el proveedor (`IA Gemini …`, `IA Heurística …`)
+  para distinguirlas en los selectores.
+- Se quitaron los guillemets «» de la interfaz y del error de Gemini; se usa
+  texto en negrita o sin comillas.
+- Diagnóstico: en EV-010 las corridas 6 y 9 solo cambian IS/IR en 4 de 18
+  factores y esos cambios se compensan, por eso el global seguía en 3.88. La
+  actualización sí ocurría.
+
+**Archivos afectados**
+
+- `frontend/src/features/scoring/Calificacion.tsx`
+- `backend/apps/literature/models.py`
+- `backend/apps/literature/providers/gemini.py`
+- `MEMORY.md`
+
+**Verificación**
+
+```text
+ruff check / format ............... All checks passed
+pytest ............................ 68 passed
+npm run typecheck ................. sin errores
+npm run build ..................... ✓ built
+etiquetas ......................... IA Heurística … / IA Gemini …
+EV-010 corridas 6 vs 9 ............ global 3.88 en ambas; 4 factores cambian IS/IR
+```
+
+**Pendiente**
+
+- Revisar en el navegador el resumen que aparece al cambiar de juego.
+
 ### 2026-11-23 — Espaciado de peticiones a Gemini
 
 **Qué se hizo**

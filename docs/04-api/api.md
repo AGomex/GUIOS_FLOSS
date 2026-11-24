@@ -346,7 +346,7 @@ factores con su PM y clasificación.
   "recommendation": {"code": "C", "label": "Proporcionar recursos y mejorar", "reasons": ["…"]},
   "swot": {"fortalezas": ["…"], "oportunidades": ["…"], "debilidades": ["…"], "amenazas": []},
   "counts": {"strengths": 7, "opportunities": 10, "weaknesses": 1, "threats": 0},
-  "literature": {"run": 4, "label": "IA 2020–2026 · 21/11/2026 21:22"},
+  "literature": {"run": 4, "label": "IA Gemini 2020–2026 · 21/11/2026 21:22"},
   "factors": [{"name": "Compatibilidad", "pm": "3.63", "ir": 3, "foda": "oportunidad"}]
 }
 ```

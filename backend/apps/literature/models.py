@@ -54,8 +54,10 @@ class LiteratureRun(TimeStampedModel):
 
     @property
     def label(self) -> str:
+        providers = {"openai": "OpenAI", "gemini": "Gemini", "mock": "Heurística"}
+        provider = providers.get(self.provider, self.get_provider_display())
+        base = f"IA {provider} {self.year_from}–{self.year_to}"
         stamp = self.created_at.strftime("%d/%m/%Y %H:%M") if self.created_at else ""
-        base = f"IA {self.year_from}–{self.year_to}"
         return f"{base} · {stamp}" if stamp else base
 
 

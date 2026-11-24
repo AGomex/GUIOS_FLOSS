@@ -270,15 +270,46 @@ export function Calificacion() {
     setSwapping(true)
     setSwapError(null)
     setSwapMessage(null)
+    const previous = evaluation
+    const previousPreview = preview
     try {
       const updated = await api.swapEvaluationLiterature(
         evaluation.id,
         value ? Number(value) : null,
       )
+      const beforeByCode = new Map(
+        previous.factors.map((factor) => [factor.code, factor]),
+      )
+      let ilChanges = 0
+      let scoreChanges = 0
+      for (const factor of updated.factors) {
+        const before = beforeByCode.get(factor.code)
+        if (!before) continue
+        if (before.il !== factor.il) ilChanges += 1
+        if (before.is_value !== factor.is_value || before.ir !== factor.ir) {
+          scoreChanges += 1
+        }
+      }
       hydrate(updated)
       const result = await api.previewEvaluation(updated.id)
       setPreview(result)
-      setSwapMessage(`Juego de literatura aplicado: ${updated.literature_run_label}.`)
+
+      const summary =
+        ilChanges === 0 && scoreChanges === 0
+          ? "Este juego produce los mismos valores calculados."
+          : `${ilChanges} ${
+              ilChanges === 1 ? "factor cambió" : "factores cambiaron"
+            } IL y ${scoreChanges} ${
+              scoreChanges === 1 ? "cambió" : "cambiaron"
+            } IS/IR.`
+      const globalNote = !previousPreview
+        ? `Global ${result.global}.`
+        : previousPreview.global === result.global
+          ? `Global sin cambios (${result.global}).`
+          : `Global ${previousPreview.global} → ${result.global}.`
+      setSwapMessage(
+        `Juego aplicado: ${updated.literature_run_label}. ${summary} ${globalNote}`,
+      )
     } catch (caught) {
       setSwapError(
         caught instanceof Error
@@ -397,9 +428,14 @@ export function Calificacion() {
             </select>
           </label>
           <p className="body-copy literature-swap__note">
-            {evaluation.literature_run
-              ? `Usando la corrida IA «${evaluation.literature_run_label}».`
-              : "Usando los valores base de importancia de la literatura."}{" "}
+            {evaluation.literature_run ? (
+              <>
+                Usando la corrida IA:{" "}
+                <strong>{evaluation.literature_run_label}</strong>.
+              </>
+            ) : (
+              "Usando los valores base de importancia de la literatura."
+            )}{" "}
             Al cambiar el juego se recalculan IS, IR y el peso de cada factor. Las
             calificaciones ya registradas se conservan.
           </p>
@@ -497,8 +533,9 @@ export function Calificacion() {
                     <div>
                       <strong>{factor.name}</strong>
                       <small>
-                        NS {factor.ns} · IS {factor.is_value} · IR{" "}
-                        {result?.ir ?? factor.ir} · peso {result?.weight ?? factor.weight}
+                        NS {factor.ns} · TC {factor.tc} · <strong>IL {factor.il}</strong> ·
+                        IS {factor.is_value} · IR {result?.ir ?? factor.ir} · peso{" "}
+                        {result?.weight ?? factor.weight}
                       </small>
                     </div>
                     <label className="factor-control">

@@ -184,7 +184,7 @@ class GeminiClassifier(Classifier):
         lowered = detail.lower()
         if status == 404:
             return (
-                f"El modelo «{self.model}» no existe o fue retirado por Google. "
+                f"El modelo {self.model} no existe o fue retirado por Google. "
                 f"Configura GEMINI_MODEL con un modelo vigente: {SUGGESTED_MODELS}."
             )
         if status in {401, 403} or reason == "PERMISSION_DENIED":
