@@ -67,6 +67,48 @@ automatización de valores:
 
 ## Registro de cambios
 
+### 2026-11-23 — Proveedores y softwares de prueba
+
+**Qué se hizo**
+
+- Nuevo comando idempotente `seed_software` que carga proveedores y softwares
+  desde `backend/apps/software/data/software.json`.
+- Datos sembrados: **14 proveedores** (Odoo S.A. y 13 nuevos) y **16 softwares**
+  (9 libres y 7 de suscripción o propietarios) para probar el sistema con
+  Gemini y con la heurística.
+- Se mantiene el software previo `Odoo ERP v17`, por lo que la base queda con
+  **17 softwares** en total.
+- El comando se añadió a los tres bloques de comandos del `README.md`.
+
+**Archivos afectados**
+
+- `backend/apps/software/data/software.json`
+- `backend/apps/software/management/commands/seed_software.py`
+- `backend/apps/software/management/__init__.py`
+- `backend/apps/software/management/commands/__init__.py`
+- `README.md`
+- `MEMORY.md`
+
+**Verificación**
+
+```text
+seed_software (x2) ................ 14 proveedores, 16 softwares (idempotente)
+Base de datos ..................... 14 proveedores, 17 softwares
+                                    10 libres, 6 suscripción, 1 propietaria
+                                    sin duplicados (name, version, provider)
+API /providers/ (APIClient) ....... 200 · 14 elementos
+API /softwares/ (APIClient) ....... 200 · 17 elementos
+ruff check / format ............... All checks passed
+pytest ............................ 68 passed
+npm run typecheck ................. sin errores
+npm run build ..................... ✓ built
+```
+
+**Pendiente**
+
+- Crear evaluaciones de prueba con los softwares nuevos usando Gemini y la
+  heurística para comparar resultados.
+
 ### 2026-11-23 — Visibilidad del juego de literatura
 
 **Qué se hizo**

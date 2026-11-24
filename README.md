@@ -80,6 +80,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe manage.py migrate
 .\.venv\Scripts\python.exe manage.py seed_catalog
 .\.venv\Scripts\python.exe manage.py seed_search_chains
+.\.venv\Scripts\python.exe manage.py seed_software
 .\.venv\Scripts\python.exe manage.py runserver
 ```
 
@@ -93,6 +94,7 @@ pip install -r requirements-dev.txt
 python manage.py migrate
 python manage.py seed_catalog
 python manage.py seed_search_chains
+python manage.py seed_software
 python manage.py runserver
 ```
 
@@ -129,6 +131,7 @@ cd backend
 .\.venv\Scripts\python.exe manage.py migrate
 .\.venv\Scripts\python.exe manage.py seed_catalog
 .\.venv\Scripts\python.exe manage.py seed_search_chains
+.\.venv\Scripts\python.exe manage.py seed_software
 .\.venv\Scripts\python.exe -m pytest
 .\.venv\Scripts\ruff.exe check .
 ```

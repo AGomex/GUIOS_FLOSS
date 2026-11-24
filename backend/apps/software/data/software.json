@@ -1,0 +1,220 @@
+{
+  "providers": [
+    {
+      "name": "Odoo S.A.",
+      "description": "Comunidad y empresa detrás del ERP Odoo.",
+      "website": "https://www.odoo.com"
+    },
+    {
+      "name": "Frappe Technologies",
+      "description": "Desarrolladores del ERP ERPNext y del framework Frappe.",
+      "website": "https://frappe.io"
+    },
+    {
+      "name": "Dolibarr Foundation",
+      "description": "Comunidad que mantiene el ERP y CRM Dolibarr.",
+      "website": "https://www.dolibarr.org"
+    },
+    {
+      "name": "The Document Foundation",
+      "description": "Fundación que mantiene la suite LibreOffice.",
+      "website": "https://www.documentfoundation.org"
+    },
+    {
+      "name": "Moodle Pty Ltd",
+      "description": "Empresa que impulsa la plataforma de aprendizaje Moodle.",
+      "website": "https://moodle.com"
+    },
+    {
+      "name": "OpenProject GmbH",
+      "description": "Empresa detrás de la gestión de proyectos OpenProject.",
+      "website": "https://www.openproject.org"
+    },
+    {
+      "name": "Nextcloud GmbH",
+      "description": "Proveedor de la plataforma de colaboración Nextcloud.",
+      "website": "https://nextcloud.com"
+    },
+    {
+      "name": "GitLab Inc.",
+      "description": "Empresa de la plataforma DevOps GitLab.",
+      "website": "https://about.gitlab.com"
+    },
+    {
+      "name": "Zammad Foundation",
+      "description": "Fundación que mantiene la mesa de ayuda Zammad.",
+      "website": "https://zammad.org"
+    },
+    {
+      "name": "SAP SE",
+      "description": "Proveedor de software empresarial, incluido S/4HANA.",
+      "website": "https://www.sap.com"
+    },
+    {
+      "name": "Microsoft Corporation",
+      "description": "Proveedor de Dynamics 365, Microsoft 365 y GitHub Enterprise.",
+      "website": "https://www.microsoft.com"
+    },
+    {
+      "name": "Oracle Corporation",
+      "description": "Proveedor de bases de datos y del ERP en la nube NetSuite.",
+      "website": "https://www.oracle.com"
+    },
+    {
+      "name": "Atlassian Pty Ltd",
+      "description": "Empresa de Jira y herramientas de colaboración para equipos.",
+      "website": "https://www.atlassian.com"
+    },
+    {
+      "name": "Salesforce, Inc.",
+      "description": "Proveedor de CRM en la nube.",
+      "website": "https://www.salesforce.com"
+    }
+  ],
+  "softwares": [
+    {
+      "name": "Odoo Community",
+      "version": "17",
+      "provider": "Odoo S.A.",
+      "license_type": "libre",
+      "category": "ERP",
+      "description": "ERP modular de código abierto para pequeñas y medianas empresas.",
+      "website": "https://www.odoo.com"
+    },
+    {
+      "name": "Odoo Enterprise",
+      "version": "17",
+      "provider": "Odoo S.A.",
+      "license_type": "suscripcion",
+      "category": "ERP",
+      "description": "Edición empresarial de Odoo con soporte y módulos adicionales.",
+      "website": "https://www.odoo.com"
+    },
+    {
+      "name": "ERPNext",
+      "version": "15",
+      "provider": "Frappe Technologies",
+      "license_type": "libre",
+      "category": "ERP",
+      "description": "ERP libre construido sobre el framework Frappe.",
+      "website": "https://frappe.io/erpnext"
+    },
+    {
+      "name": "Dolibarr",
+      "version": "19",
+      "provider": "Dolibarr Foundation",
+      "license_type": "libre",
+      "category": "ERP/CRM",
+      "description": "ERP y CRM libre para pequeñas y medianas empresas.",
+      "website": "https://www.dolibarr.org"
+    },
+    {
+      "name": "LibreOffice",
+      "version": "24.8",
+      "provider": "The Document Foundation",
+      "license_type": "libre",
+      "category": "Ofimática",
+      "description": "Suite ofimática libre con procesador, hoja de cálculo y presentaciones.",
+      "website": "https://www.libreoffice.org"
+    },
+    {
+      "name": "Moodle",
+      "version": "4.4",
+      "provider": "Moodle Pty Ltd",
+      "license_type": "libre",
+      "category": "LMS",
+      "description": "Plataforma libre de aprendizaje en línea.",
+      "website": "https://moodle.org"
+    },
+    {
+      "name": "OpenProject",
+      "version": "14",
+      "provider": "OpenProject GmbH",
+      "license_type": "libre",
+      "category": "Gestión de proyectos",
+      "description": "Gestión de proyectos libre con planificación y seguimiento.",
+      "website": "https://www.openproject.org"
+    },
+    {
+      "name": "Nextcloud Hub",
+      "version": "8",
+      "provider": "Nextcloud GmbH",
+      "license_type": "libre",
+      "category": "Colaboración",
+      "description": "Plataforma libre de colaboración, archivos y ofimática en la nube.",
+      "website": "https://nextcloud.com"
+    },
+    {
+      "name": "GitLab CE",
+      "version": "17",
+      "provider": "GitLab Inc.",
+      "license_type": "libre",
+      "category": "DevOps",
+      "description": "Plataforma libre de DevOps y control de versiones.",
+      "website": "https://about.gitlab.com"
+    },
+    {
+      "name": "Zammad",
+      "version": "6.3",
+      "provider": "Zammad Foundation",
+      "license_type": "libre",
+      "category": "Mesa de ayuda",
+      "description": "Sistema libre de mesa de ayuda y gestión de tickets.",
+      "website": "https://zammad.org"
+    },
+    {
+      "name": "SAP S/4HANA",
+      "version": "2023",
+      "provider": "SAP SE",
+      "license_type": "propietaria",
+      "category": "ERP",
+      "description": "ERP empresarial propietario con base de datos en memoria.",
+      "website": "https://www.sap.com/products/erp/s4hana.html"
+    },
+    {
+      "name": "Microsoft Dynamics 365 Business Central",
+      "version": "2024",
+      "provider": "Microsoft Corporation",
+      "license_type": "suscripcion",
+      "category": "ERP",
+      "description": "ERP en la nube para pequeñas y medianas empresas.",
+      "website": "https://www.microsoft.com/dynamics-365/products/business-central"
+    },
+    {
+      "name": "Oracle NetSuite",
+      "version": "2024.1",
+      "provider": "Oracle Corporation",
+      "license_type": "suscripcion",
+      "category": "ERP",
+      "description": "ERP y CRM en la nube para empresas en crecimiento.",
+      "website": "https://www.netsuite.com"
+    },
+    {
+      "name": "Jira Software",
+      "version": "10",
+      "provider": "Atlassian Pty Ltd",
+      "license_type": "suscripcion",
+      "category": "Gestión de proyectos",
+      "description": "Gestión ágil de proyectos y seguimiento de incidencias.",
+      "website": "https://www.atlassian.com/software/jira"
+    },
+    {
+      "name": "GitHub Enterprise",
+      "version": "2024",
+      "provider": "Microsoft Corporation",
+      "license_type": "suscripcion",
+      "category": "DevOps",
+      "description": "Plataforma de desarrollo y colaboración con control de versiones.",
+      "website": "https://github.com/enterprise"
+    },
+    {
+      "name": "Salesforce Sales Cloud",
+      "version": "2024",
+      "provider": "Salesforce, Inc.",
+      "license_type": "suscripcion",
+      "category": "CRM",
+      "description": "CRM en la nube para ventas y atención al cliente.",
+      "website": "https://www.salesforce.com/sales/cloud/"
+    }
+  ]
+}
