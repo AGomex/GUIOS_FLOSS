@@ -533,8 +533,8 @@ export function Calificacion() {
                     <div>
                       <strong>{factor.name}</strong>
                       <small>
-                        NS {factor.ns} · TC {factor.tc} · <strong>IL {factor.il}</strong> ·
-                        IS {factor.is_value} · IR {result?.ir ?? factor.ir} · peso{" "}
+                        NS {factor.ns} · <b>TC {factor.tc}</b> · IL {factor.il} · IS{" "}
+                        {factor.is_value} · IR {result?.ir ?? factor.ir} · peso{" "}
                         {result?.weight ?? factor.weight}
                       </small>
                     </div>

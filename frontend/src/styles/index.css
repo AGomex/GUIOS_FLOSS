@@ -408,7 +408,7 @@ tbody tr:hover { background: #f8fafc; }
 .factor-block .score-row { border-left: 0; border-right: 0; }
 .factor-head { display: grid; grid-template-columns: minmax(0, 1fr) 80px 130px 160px; gap: 12px; align-items: center; background: var(--fill); padding: 8px 12px; font-size: 11px; }
 .factor-head strong { display: block; }
-.factor-head small { display: block; color: var(--muted); font-size: 9px; margin-top: 2px; }
+.factor-head small { display: block; color: var(--muted); font-size: 9px; margin-top: 2px; white-space: nowrap; }
 .factor-control { display: grid; gap: 3px; color: var(--muted); font-size: 9px; font-weight: 600; }
 .factor-control select { border: 1px solid var(--border); background: var(--surface); padding: 4px 6px; font-size: 10px; }
 .factor-result { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }

@@ -71,10 +71,10 @@ automatización de valores:
 
 **Qué se hizo**
 
-- La fila de cada factor en Calificación muestra ahora `TC` e `IL` (este último en
-  negrita), además de NS, IS, IR y peso.
-- Al cambiar de juego se informa cuántos factores cambiaron: «8 factores
-  cambiaron IL y 4 cambiaron IS/IR», y si el global varió o se mantuvo.
+- La fila de cada factor en Calificación muestra `TC` e `IL` en una sola línea,
+  con `TC` en negrita, además de NS, IS, IR y peso.
+- Al cambiar de juego se informa cuántos factores cambiaron IL e IS/IR y si el
+  global varió o se mantuvo.
 - El nombre de la corrida incluye el proveedor (`IA Gemini …`, `IA Heurística …`)
   para distinguirlas en los selectores.
 - Se quitaron los guillemets «» de la interfaz y del error de Gemini; se usa
