@@ -23,5 +23,6 @@ def get_classifier(provider: str | None = None) -> Classifier:
             model=config["gemini_model"],
             api_key=config["gemini_api_key"],
             timeout=config["timeout"],
+            min_interval=config["gemini_min_interval"],
         )
     return HeuristicClassifier()

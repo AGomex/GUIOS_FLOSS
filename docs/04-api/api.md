@@ -528,6 +528,12 @@ Configuración:
 }
 ```
 
+El proveedor Gemini espacia las peticiones para respetar el nivel gratuito: por
+defecto espera 4,5 s entre llamadas (`GEMINI_MIN_INTERVAL`), lo que mantiene el
+uso por debajo de 15 RPM. Ante un `429` respeta el `retryDelay` que indica Google
+(tope de 60 s) y hace hasta 4 intentos. Si el `429` corresponde al cupo diario
+(500 RPD), detiene la corrida con un mensaje claro en lugar de reintentar.
+
 Lanzar una corrida:
 
 ```http

@@ -67,6 +67,46 @@ automatización de valores:
 
 ## Registro de cambios
 
+### 2026-11-23 — Espaciado de peticiones a Gemini
+
+**Qué se hizo**
+
+- Una corrida de prueba alcanzó `16/15` RPM del nivel gratuito porque hacía
+  hasta 36 llamadas seguidas.
+- `GeminiClassifier` espacia las peticiones con un mínimo de 4,5 s
+  (`GEMINI_MIN_INTERVAL`), compartido entre instancias e hilos: ~13 RPM.
+- Ante `429` respeta `error.details[].retryDelay` (tope 60 s) y hace hasta
+  4 intentos.
+- Si el `429` corresponde al cupo diario (`quotaId` con `PerDay`), no reintenta y
+  explica que se renueva a medianoche del Pacífico.
+- `.env` y `.env.example` incluyen `GEMINI_MIN_INTERVAL=4.5`.
+
+**Archivos afectados**
+
+- `backend/apps/literature/providers/gemini.py`
+- `backend/apps/literature/providers/__init__.py`
+- `backend/config/settings/base.py`
+- `.env`, `.env.example`
+- `docs/04-api/api.md`
+- `MEMORY.md`
+
+**Verificación**
+
+```text
+ruff check / format ............... All checks passed
+pytest ............................ 68 passed
+intervalo aplicado ................ 4.5 s
+3 llamadas reales ................. espaciadas ~4,5 s; un 503 se recuperó con reintento
+retryDelay simulado (17s) ......... 17.0 s
+cupo diario (PerDay) .............. detectado
+límite por minuto ................. no se confunde con cupo diario
+```
+
+**Pendiente**
+
+- Repetir una corrida completa desde la interfaz con 20 candidatos por factor y
+  confirmar que no aparece el aviso de 15 RPM.
+
 ### 2026-11-23 — Corrección del proveedor Gemini
 
 **Qué se hizo**
