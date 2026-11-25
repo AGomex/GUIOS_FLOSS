@@ -73,8 +73,6 @@ services:
     name: guiospro-frontend
     runtime: static
     rootDir: frontend
-    plan: free
-    region: oregon
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
     envVars:

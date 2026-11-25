@@ -74,6 +74,8 @@ automatización de valores:
 - Preparado el proyecto para Render con tres recursos definidos en
   `render.yaml`: `guiospro-db` (Postgres free), `guiospro-api` (Web Service
   Python + Gunicorn) y `guiospro-frontend` (Static Site).
+- El sitio estático no declara `plan` ni `region`: Render los rechaza porque se
+  sirve desde un CDN global y no tiene plan de cómputo.
 - El backend ahora lee `DATABASE_URL` con `dj-database-url`; si no existe,
   conserva SQLite o las variables `POSTGRES_*`. Se añadió `SQLITE_PATH` para
   probar bases temporales.
