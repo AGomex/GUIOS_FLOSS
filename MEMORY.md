@@ -67,6 +67,73 @@ automatización de valores:
 
 ## Registro de cambios
 
+### 2026-11-24 — Despliegue en Render con Postgres y snapshot
+
+**Qué se hizo**
+
+- Preparado el proyecto para Render con tres recursos definidos en
+  `render.yaml`: `guiospro-db` (Postgres free), `guiospro-api` (Web Service
+  Python + Gunicorn) y `guiospro-frontend` (Static Site).
+- El backend ahora lee `DATABASE_URL` con `dj-database-url`; si no existe,
+  conserva SQLite o las variables `POSTGRES_*`. Se añadió `SQLITE_PATH` para
+  probar bases temporales.
+- `config/settings/prod.py` incorpora WhiteNoise, `CompressedStaticFilesStorage`,
+  `RENDER_EXTERNAL_HOSTNAME` en `ALLOWED_HOSTS` y mantiene las cookies seguras.
+- Nuevo `CSRF_TRUSTED_ORIGINS` y `SECURE_PROXY_SSL_HEADER` para el admin detrás
+  del proxy de Render.
+- Exportada la información actual a `backend/data/demo_snapshot.json.gz`
+  (357.649 bytes) con catálogo, proveedores, softwares, literatura y
+  evaluaciones.
+- Nuevo comando `load_demo_snapshot`: carga el fixture solo si la base está
+  vacía, resetea secuencias en PostgreSQL y no duplica en redespliegues.
+- Nuevo comando `ensure_superuser`: crea el admin desde `DJANGO_SUPERUSER_*`
+  de forma idempotente y no hace nada si falta la contraseña.
+- El build de Render ejecuta `collectstatic`, `migrate`, `load_demo_snapshot` y
+  `ensure_superuser`; el arranque usa Gunicorn en `0.0.0.0:$PORT`.
+- Dependencias nuevas: `dj-database-url`, `psycopg[binary]`, `whitenoise` y
+  `gunicorn`. `staticfiles/` añadido a `.gitignore`.
+- Documentado el despliegue en `README.md` y las variables en `.env.example`.
+
+**Archivos afectados**
+
+- `render.yaml`
+- `backend/requirements.txt`
+- `backend/config/settings/base.py`
+- `backend/config/settings/prod.py`
+- `backend/data/demo_snapshot.json.gz`
+- `backend/apps/core/management/__init__.py`
+- `backend/apps/core/management/commands/__init__.py`
+- `backend/apps/core/management/commands/load_demo_snapshot.py`
+- `backend/apps/core/management/commands/ensure_superuser.py`
+- `.env.example`
+- `.gitignore`
+- `README.md`
+- `MEMORY.md`
+
+**Verificación**
+
+```text
+Snapshot .......................... 357.649 bytes (gzip)
+Carga en SQLite temporal .......... 3 dimensiones, 18 factores, 61 subfactores
+                                    14 proveedores, 17 softwares, 6 corridas
+                                    21 evaluaciones (9 demo)
+Segunda ejecución ................. omite la carga, no duplica
+API health / evaluations .......... 200 · 21 evaluaciones
+API results EV-017 ................ 3.63 · recomendación A
+API comparisons ................... 3.63 / 3.62 / 3.60
+API dashboard ..................... 13 finalizadas
+collectstatic (prod) .............. 154 archivos, 145 postprocesados
+ruff check / format ............... All checks passed · 127 archivos
+pytest ............................ 68 passed
+npm run typecheck ................. sin errores
+npm run build ..................... ✓ built
+```
+
+**Pendiente**
+
+- Aplicar el Blueprint en Render, cargar `GEMINI_API_KEY` y la contraseña del
+  superusuario, y comprobar las URLs públicas.
+
 ### 2026-11-23 — Evaluaciones de demostración
 
 **Qué se hizo**

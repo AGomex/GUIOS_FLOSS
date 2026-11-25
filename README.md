@@ -190,7 +190,88 @@ se modifica.
 
 ---
 
-## 7. Referencias
+## 7. Despliegue en Render
+
+El repositorio incluye [`render.yaml`](./render.yaml), un Blueprint que crea tres
+recursos en el plan gratuito:
+
+| Recurso | Tipo | Función |
+|---|---|---|
+| `guiospro-db` | Render Postgres | Base de datos con toda la información |
+| `guiospro-api` | Web Service Python | Django + Gunicorn, API y admin |
+| `guiospro-frontend` | Static Site | React + Vite compilado |
+
+### 7.1 Qué hace el build
+
+```text
+pip install -r requirements.txt
+python manage.py collectstatic --noinput
+python manage.py migrate --noinput
+python manage.py load_demo_snapshot
+python manage.py ensure_superuser
+```
+
+- `load_demo_snapshot` carga `backend/data/demo_snapshot.json.gz` (≈358 KB) solo
+  si la base no tiene datos de negocio. En redespliegues no duplica nada.
+- `ensure_superuser` crea el admin con `DJANGO_SUPERUSER_*` si la contraseña está
+  definida y no modifica un usuario existente.
+
+### 7.2 Pasos
+
+1. Sube los cambios a `main`:
+
+   ```bash
+   git push origin main
+   ```
+
+2. En Render: **New → Blueprint**, elige el repositorio y pulsa **Apply**.
+3. Render crea la base y los dos servicios y ejecuta el build (5–8 minutos).
+4. En el dashboard del servicio `guiospro-api`, completa los secretos:
+   - `GEMINI_API_KEY`
+   - `DJANGO_SUPERUSER_EMAIL`
+   - `DJANGO_SUPERUSER_PASSWORD`
+5. Pulsa **Manual Deploy → Deploy latest commit** para que el build tome los
+   secretos y cree el superusuario.
+6. Comprueba:
+
+   | Recurso | URL |
+   |---|---|
+   | Salud | `https://guiospro-api.onrender.com/api/v1/health/` |
+   | Swagger | `https://guiospro-api.onrender.com/api/docs/` |
+   | Admin | `https://guiospro-api.onrender.com/admin/` |
+   | Frontend | `https://guiospro-frontend.onrender.com` |
+
+Si Render asigna otros nombres porque los previstos están ocupados, ajusta
+`DJANGO_ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS` y
+`VITE_API_URL` en el Blueprint.
+
+### 7.3 Variables principales
+
+| Variable | Valor |
+|---|---|
+| `DJANGO_SETTINGS_MODULE` | `config.settings.prod` |
+| `DATABASE_URL` | desde `guiospro-db` |
+| `DJANGO_ALLOWED_HOSTS` | `guiospro-api.onrender.com` |
+| `CORS_ALLOWED_ORIGINS` | `https://guiospro-frontend.onrender.com` |
+| `CSRF_TRUSTED_ORIGINS` | `https://guiospro-api.onrender.com` |
+| `LITERATURE_PROVIDER` | `gemini` |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite` |
+| `GEMINI_MIN_INTERVAL` | `4.5` |
+| `VITE_API_URL` | `https://guiospro-api.onrender.com/api/v1` |
+
+### 7.4 Límites del plan gratuito
+
+- El web service **duerme tras 15 minutos** sin tráfico; el primer acceso tarda
+  cerca de un minuto. Abre `/api/v1/health/` antes de la demo.
+- El Postgres gratuito **expira a los 30 días**. Si se recrea, el siguiente build
+  vuelve a cargar el snapshot automáticamente.
+- No hay Shell ni Jobs: por eso la carga de datos va en el build.
+- Gemini depende del cupo gratuito diario; la corrida se detiene con un mensaje
+  claro cuando se agota.
+
+---
+
+## 8. Referencias
 
 - Fórmulas y Tabla 5.3: [`docs/02-dominio/calculos.md`](./docs/02-dominio/calculos.md).
 - Sistema anterior (oráculo de cálculo): [`reference/legacy-guiospro/`](./reference/legacy-guiospro/).
